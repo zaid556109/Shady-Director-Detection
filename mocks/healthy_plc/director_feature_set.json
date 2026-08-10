@@ -1,0 +1,28 @@
+{
+  "aggregates": {
+    "any_disqualified": false,
+    "max_dissolved_company_count": 0,
+    "max_shared_address_cluster_size": 1,
+    "min_avg_tenure_days": 2500.0,
+    "officer_count": 2
+  },
+  "company_number": "01234567",
+  "officers": [
+    {
+      "appointments_count": 2,
+      "avg_tenure_days": 3285.0,
+      "disqualification_flag": false,
+      "dissolved_company_count": 0,
+      "officer_id": "off-healthy-001",
+      "shared_address_cluster_size": 1
+    },
+    {
+      "appointments_count": 1,
+      "avg_tenure_days": 2500.0,
+      "disqualification_flag": false,
+      "dissolved_company_count": 0,
+      "officer_id": "off-healthy-002",
+      "shared_address_cluster_size": 1
+    }
+  ]
+}

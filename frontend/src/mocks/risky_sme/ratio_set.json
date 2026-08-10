@@ -1,0 +1,25 @@
+{
+  "altman_z": {
+    "computable": true,
+    "reason": null,
+    "value": 1.1
+  },
+  "company_number": "07654321",
+  "current_ratio": {
+    "computable": true,
+    "reason": null,
+    "value": 0.63
+  },
+  "filing_year": 2023,
+  "gearing": {
+    "computable": true,
+    "reason": null,
+    "value": -5.0
+  },
+  "net_assets": {
+    "computable": true,
+    "reason": null,
+    "value": -25000.0
+  },
+  "yoy_trends": []
+}

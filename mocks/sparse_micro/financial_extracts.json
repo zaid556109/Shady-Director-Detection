@@ -1,0 +1,27 @@
+[
+  {
+    "balance_sheet": {
+      "cash": null,
+      "current_assets": null,
+      "current_liabilities": null,
+      "fixed_assets": null,
+      "long_term_liabilities": null,
+      "net_assets": 8500.0,
+      "shareholder_funds": 8500.0
+    },
+    "company_number": "09999999",
+    "currency": "GBP",
+    "extraction_confidence": 0.6,
+    "filing_year": 2024,
+    "period_end": "2024-11-30",
+    "period_start": "2023-12-01",
+    "profit_and_loss": {
+      "gross_profit": null,
+      "operating_profit": null,
+      "profit_after_tax": null,
+      "profit_before_tax": null,
+      "turnover": null
+    },
+    "source_format": "ixbrl"
+  }
+]

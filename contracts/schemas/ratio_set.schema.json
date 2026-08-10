@@ -1,0 +1,165 @@
+{
+  "$defs": {
+    "RatioValue": {
+      "description": "A single computed ratio, or an explicit reason it couldn't be computed.\n\nMicro-entity accounts frequently omit the line items a ratio needs (e.g.\nno P&L filed at all), so every ratio in `RatioSet` is wrapped in this\nrather than being a bare `float | None` \u2014 `computable=False` plus\n`reason` is what lets the scoring module and the UI distinguish \"this\ncompany has a ratio of zero\" from \"we don't have enough data\".",
+      "example": {
+        "computable": true,
+        "reason": null,
+        "value": 1.8
+      },
+      "properties": {
+        "computable": {
+          "description": "Whether enough source data existed to compute this.",
+          "title": "Computable",
+          "type": "boolean"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set when computable=False, e.g. 'no P&L filed (micro-entity exemption)'.",
+          "title": "Reason"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Null when not computable.",
+          "title": "Value"
+        }
+      },
+      "required": [
+        "computable"
+      ],
+      "title": "RatioValue",
+      "type": "object"
+    },
+    "YoyTrend": {
+      "description": "Year-over-year direction for one ratio, computed when 2+ filing years\nare available.",
+      "example": {
+        "delta_pct": 12.5,
+        "direction": "improving",
+        "metric": "net_assets"
+      },
+      "properties": {
+        "delta_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "% change year-over-year, null if not computable.",
+          "title": "Delta Pct"
+        },
+        "direction": {
+          "description": "'improving' | 'deteriorating' | 'flat'.",
+          "title": "Direction",
+          "type": "string"
+        },
+        "metric": {
+          "description": "Which underlying figure this trend describes, e.g. 'net_assets'.",
+          "title": "Metric",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "direction"
+      ],
+      "title": "YoyTrend",
+      "type": "object"
+    }
+  },
+  "description": "Financial ratios for a company, computed from its most recent (and\nprior, for trends) FinancialExtracts.\n\n`company_number` is here (not just on FinancialExtract) so that\n`scoring.score()` can resolve mock/real data by company number from\nthis object alone \u2014 see `backend/app/workers/pipeline.py`.",
+  "example": {
+    "altman_z": {
+      "computable": true,
+      "reason": null,
+      "value": 4.1
+    },
+    "company_number": "01234567",
+    "current_ratio": {
+      "computable": true,
+      "reason": null,
+      "value": 3.0
+    },
+    "filing_year": 2024,
+    "gearing": {
+      "computable": true,
+      "reason": null,
+      "value": 0.12
+    },
+    "net_assets": {
+      "computable": true,
+      "reason": null,
+      "value": 330000.0
+    },
+    "yoy_trends": [
+      {
+        "delta_pct": 12.5,
+        "direction": "improving",
+        "metric": "net_assets"
+      }
+    ]
+  },
+  "properties": {
+    "altman_z": {
+      "$ref": "#/$defs/RatioValue",
+      "description": "Altman Z-score (private-company variant)."
+    },
+    "company_number": {
+      "title": "Company Number",
+      "type": "string"
+    },
+    "current_ratio": {
+      "$ref": "#/$defs/RatioValue",
+      "description": "current_assets / current_liabilities."
+    },
+    "filing_year": {
+      "description": "Most recent filing year these ratios are computed as-of.",
+      "title": "Filing Year",
+      "type": "integer"
+    },
+    "gearing": {
+      "$ref": "#/$defs/RatioValue",
+      "description": "(long_term_liabilities + current_liabilities) / shareholder_funds."
+    },
+    "net_assets": {
+      "$ref": "#/$defs/RatioValue",
+      "description": "Passthrough of balance_sheet.net_assets, flagged if negative."
+    },
+    "yoy_trends": {
+      "items": {
+        "$ref": "#/$defs/YoyTrend"
+      },
+      "title": "Yoy Trends",
+      "type": "array"
+    }
+  },
+  "required": [
+    "company_number",
+    "filing_year",
+    "current_ratio",
+    "gearing",
+    "net_assets",
+    "altman_z"
+  ],
+  "title": "RatioSet",
+  "type": "object"
+}

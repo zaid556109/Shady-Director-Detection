@@ -1,0 +1,38 @@
+{
+  "accounts_overdue": true,
+  "company_name": "RISKY EXAMPLE LIMITED",
+  "company_number": "07654321",
+  "data_completeness": 0.8,
+  "filing_history": {
+    "last_accounts_made_up_to": "2023-01-31",
+    "last_confirmation_statement_date": "2023-09-01",
+    "late_filings_count": 3,
+    "next_accounts_due_on": "2024-10-31",
+    "total_filings": 8
+  },
+  "incorporation_date": "2016-09-01",
+  "officers": [
+    {
+      "appointed_on": "2016-09-01",
+      "name": "BROWN, David Alan",
+      "nationality": "British",
+      "occupation": "Company Director",
+      "officer_id": "off-risky-001",
+      "resigned_on": null,
+      "role": "director"
+    }
+  ],
+  "registered_address": {
+    "address_line_1": "Industrial Estate",
+    "address_line_2": null,
+    "country": "England",
+    "locality": "Birmingham",
+    "postal_code": "B1 1AA",
+    "premises": "Unit 4",
+    "region": null
+  },
+  "sic_codes": [
+    "46900"
+  ],
+  "status": "active"
+}

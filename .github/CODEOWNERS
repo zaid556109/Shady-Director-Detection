@@ -1,0 +1,32 @@
+# CODEOWNERS
+#
+# Placeholder handles — find-replace @person1..@person5 with real GitHub
+# usernames once the group is finalized. Roles are noted in comments so the
+# find-replace is unambiguous. See README.md "Ownership map" for the same
+# table with rationale.
+
+# @person1 = Ingestion (Companies House client)
+# @person2 = Financials (iXBRL / ratios)
+# @person3 = Governance (director graph / red flags)
+# @person4 = Scoring (scorecard / explanations)
+# @person5 = Platform & Integration Lead (API, DB, workers, CI/infra, frontend)
+
+# Default: integration lead reviews anything not matched below
+*                                   @person5
+
+# Contracts: integration lead has final say, but anyone may propose changes
+/contracts/                        @person5
+
+/backend/app/api/                  @person5
+/backend/app/db/                   @person5
+/backend/app/workers/              @person5
+/backend/app/ingestion/            @marwahkhokher
+/backend/app/financials/           @raniaaamer999
+/backend/app/director_features/    @zaid556109
+/backend/app/scoring/              @person4
+
+/frontend/                         @person5
+
+/.github/                          @person5
+/docker-compose.yml                @person5
+/Makefile                          @person5

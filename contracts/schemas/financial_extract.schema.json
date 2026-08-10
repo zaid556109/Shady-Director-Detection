@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "BalanceSheetItems": {
+      "description": "Balance sheet line items, GBP, as filed. All optional \u2014 micro-entity\naccounts under FRS 105 typically file only `net_assets` and share capital.",
+      "example": {
+        "cash": 90000.0,
+        "current_assets": 180000.0,
+        "current_liabilities": 60000.0,
+        "fixed_assets": 250000.0,
+        "long_term_liabilities": 40000.0,
+        "net_assets": 330000.0,
+        "shareholder_funds": 330000.0
+      },
+      "properties": {
+        "cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cash"
+        },
+        "current_assets": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Assets"
+        },
+        "current_liabilities": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Liabilities"
+        },
+        "fixed_assets": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fixed Assets"
+        },
+        "long_term_liabilities": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Long Term Liabilities"
+        },
+        "net_assets": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Net Assets"
+        },
+        "shareholder_funds": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shareholder Funds"
+        }
+      },
+      "title": "BalanceSheetItems",
+      "type": "object"
+    },
+    "ProfitAndLossItems": {
+      "description": "P&L line items, GBP, as filed. Often entirely absent for micro-entity\naccounts (FRS 105 doesn't require filing a P&L).",
+      "example": {
+        "gross_profit": 400000.0,
+        "operating_profit": 150000.0,
+        "profit_after_tax": 112000.0,
+        "profit_before_tax": 140000.0,
+        "turnover": 900000.0
+      },
+      "properties": {
+        "gross_profit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gross Profit"
+        },
+        "operating_profit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operating Profit"
+        },
+        "profit_after_tax": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profit After Tax"
+        },
+        "profit_before_tax": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profit Before Tax"
+        },
+        "turnover": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turnover"
+        }
+      },
+      "title": "ProfitAndLossItems",
+      "type": "object"
+    },
+    "SourceFormat": {
+      "description": "How a FinancialExtract's underlying filing was obtained.",
+      "enum": [
+        "ixbrl",
+        "pdf_scanned",
+        "missing"
+      ],
+      "title": "SourceFormat",
+      "type": "string"
+    }
+  },
+  "description": "One filing period's parsed accounts.\n\n`source_format` and `extraction_confidence` exist so downstream ratio\ncalculation and scoring can distinguish \"clean iXBRL parse\" from \"we\nscraped numbers out of a scanned PDF\" \u2014 the latter should weight lower\nin `ScoreBreakdown`, not error out.",
+  "example": {
+    "balance_sheet": {
+      "cash": 90000.0,
+      "current_assets": 180000.0,
+      "current_liabilities": 60000.0,
+      "fixed_assets": 250000.0,
+      "long_term_liabilities": 40000.0,
+      "net_assets": 330000.0,
+      "shareholder_funds": 330000.0
+    },
+    "company_number": "01234567",
+    "currency": "GBP",
+    "extraction_confidence": 0.98,
+    "filing_year": 2024,
+    "period_end": "2024-03-31",
+    "period_start": "2023-04-01",
+    "profit_and_loss": {
+      "gross_profit": 400000.0,
+      "operating_profit": 150000.0,
+      "profit_after_tax": 112000.0,
+      "profit_before_tax": 140000.0,
+      "turnover": 900000.0
+    },
+    "source_format": "ixbrl"
+  },
+  "properties": {
+    "balance_sheet": {
+      "$ref": "#/$defs/BalanceSheetItems"
+    },
+    "company_number": {
+      "title": "Company Number",
+      "type": "string"
+    },
+    "currency": {
+      "default": "GBP",
+      "title": "Currency",
+      "type": "string"
+    },
+    "extraction_confidence": {
+      "description": "1.0 = clean structured parse, lower = degraded/manual extraction.",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Extraction Confidence",
+      "type": "number"
+    },
+    "filing_year": {
+      "description": "Calendar year the accounting period ends in.",
+      "title": "Filing Year",
+      "type": "integer"
+    },
+    "period_end": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Period End"
+    },
+    "period_start": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Period Start"
+    },
+    "profit_and_loss": {
+      "$ref": "#/$defs/ProfitAndLossItems"
+    },
+    "source_format": {
+      "$ref": "#/$defs/SourceFormat"
+    }
+  },
+  "required": [
+    "company_number",
+    "filing_year",
+    "source_format",
+    "extraction_confidence"
+  ],
+  "title": "FinancialExtract",
+  "type": "object"
+}

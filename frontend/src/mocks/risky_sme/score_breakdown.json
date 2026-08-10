@@ -1,0 +1,88 @@
+{
+  "cluster_subscores": {
+    "financial": 22.0,
+    "governance": 35.0
+  },
+  "company_number": "07654321",
+  "explanation": "Negative equity, overdue accounts, and a director with two previously dissolved companies drive a low reliability score despite no active disqualifications.",
+  "feature_contributions": [
+    {
+      "feature_name": "current_ratio",
+      "points": 3.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "gearing",
+      "points": 1.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "net_assets",
+      "points": 0.0,
+      "weight": 0.1
+    },
+    {
+      "feature_name": "altman_z",
+      "points": 2.0,
+      "weight": 0.1
+    },
+    {
+      "feature_name": "disqualification_flag",
+      "points": 25.0,
+      "weight": 0.25
+    },
+    {
+      "feature_name": "dissolved_company_count",
+      "points": -6.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "shared_address_cluster_size",
+      "points": 3.0,
+      "weight": 0.1
+    }
+  ],
+  "flags": [
+    {
+      "category": "governance",
+      "evidence": [
+        {
+          "detail": "2 dissolved companies in the last 5 years",
+          "source_id": "off-risky-001",
+          "source_type": "officer"
+        }
+      ],
+      "human_label": "A director has 2 previously dissolved companies",
+      "id": "dissolved-companies-2",
+      "severity": "warning"
+    },
+    {
+      "category": "filing",
+      "evidence": [
+        {
+          "detail": "Accounts due 2024-10-31, not yet filed",
+          "source_id": "07654321-accounts-2024",
+          "source_type": "filing"
+        }
+      ],
+      "human_label": "Statutory accounts are overdue",
+      "id": "accounts-overdue",
+      "severity": "critical"
+    },
+    {
+      "category": "financial",
+      "evidence": [
+        {
+          "detail": "Net assets -25,000 GBP as at 2023-01-31",
+          "source_id": "07654321-accounts-2023",
+          "source_type": "filing"
+        }
+      ],
+      "human_label": "Company has negative net assets (negative equity)",
+      "id": "negative-equity",
+      "severity": "critical"
+    }
+  ],
+  "generated_at": "2026-08-10T12:00:00",
+  "total": 28
+}

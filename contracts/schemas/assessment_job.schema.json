@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "JobError": {
+      "description": "Populated when status=FAILED. Kept structured (not just a string) so\nthe frontend can show a stage-specific retry hint.",
+      "example": {
+        "message": "No filed accounts found for this company number.",
+        "retryable": false,
+        "stage": "financials"
+      },
+      "properties": {
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "description": "Whether re-running the job might succeed (e.g. CH rate limit vs. bad input).",
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "stage": {
+          "$ref": "#/$defs/PipelineStage"
+        }
+      },
+      "required": [
+        "stage",
+        "message",
+        "retryable"
+      ],
+      "title": "JobError",
+      "type": "object"
+    },
+    "JobStatus": {
+      "enum": [
+        "pending",
+        "running",
+        "completed",
+        "failed"
+      ],
+      "title": "JobStatus",
+      "type": "string"
+    },
+    "PipelineStage": {
+      "description": "Mirrors the call sequence in `backend/app/workers/pipeline.py`.",
+      "enum": [
+        "ingestion",
+        "financials",
+        "director_features",
+        "scoring",
+        "done"
+      ],
+      "title": "PipelineStage",
+      "type": "string"
+    }
+  },
+  "description": "Status record for one async assessment run.",
+  "example": {
+    "company_number": "01234567",
+    "created_at": "2026-08-10T12:00:00Z",
+    "error": null,
+    "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "stage": "financials",
+    "status": "running",
+    "updated_at": "2026-08-10T12:00:20Z"
+  },
+  "properties": {
+    "company_number": {
+      "title": "Company Number",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JobError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "job_id": {
+      "description": "UUID4, generated when the job is created.",
+      "title": "Job Id",
+      "type": "string"
+    },
+    "stage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PipelineStage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Current/last pipeline stage reached."
+    },
+    "status": {
+      "$ref": "#/$defs/JobStatus"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "job_id",
+    "company_number",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "AssessmentJob",
+  "type": "object"
+}

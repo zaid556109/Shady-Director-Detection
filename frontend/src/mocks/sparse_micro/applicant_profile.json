@@ -1,0 +1,38 @@
+{
+  "accounts_overdue": false,
+  "company_name": "SPARSE MICRO ENTITY LTD",
+  "company_number": "09999999",
+  "data_completeness": 0.55,
+  "filing_history": {
+    "last_accounts_made_up_to": "2024-11-30",
+    "last_confirmation_statement_date": "2024-12-01",
+    "late_filings_count": 0,
+    "next_accounts_due_on": "2025-08-31",
+    "total_filings": 3
+  },
+  "incorporation_date": "2021-11-20",
+  "officers": [
+    {
+      "appointed_on": "2021-11-20",
+      "name": "PATEL, Amir",
+      "nationality": "British",
+      "occupation": "Director",
+      "officer_id": "off-sparse-001",
+      "resigned_on": null,
+      "role": "director"
+    }
+  ],
+  "registered_address": {
+    "address_line_1": "Formation Row",
+    "address_line_2": null,
+    "country": "Wales",
+    "locality": "Cardiff",
+    "postal_code": "CF1 1AA",
+    "premises": "12",
+    "region": null
+  },
+  "sic_codes": [
+    "96090"
+  ],
+  "status": "active"
+}

@@ -1,0 +1,20 @@
+{
+  "aggregates": {
+    "any_disqualified": false,
+    "max_dissolved_company_count": 2,
+    "max_shared_address_cluster_size": 3,
+    "min_avg_tenure_days": 620.0,
+    "officer_count": 1
+  },
+  "company_number": "07654321",
+  "officers": [
+    {
+      "appointments_count": 5,
+      "avg_tenure_days": 620.0,
+      "disqualification_flag": false,
+      "dissolved_company_count": 2,
+      "officer_id": "off-risky-001",
+      "shared_address_cluster_size": 3
+    }
+  ]
+}

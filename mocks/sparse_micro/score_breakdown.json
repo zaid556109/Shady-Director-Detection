@@ -1,0 +1,48 @@
+{
+  "cluster_subscores": {
+    "financial": 45.0,
+    "governance": 70.0
+  },
+  "company_number": "09999999",
+  "explanation": "Clean director history supports the score, but minimal micro-entity accounts leave most financial ratios uncomputable, capping confidence at a mid-range result.",
+  "feature_contributions": [
+    {
+      "feature_name": "current_ratio",
+      "points": 0.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "gearing",
+      "points": 0.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "net_assets",
+      "points": 8.0,
+      "weight": 0.1
+    },
+    {
+      "feature_name": "altman_z",
+      "points": 0.0,
+      "weight": 0.1
+    },
+    {
+      "feature_name": "disqualification_flag",
+      "points": 25.0,
+      "weight": 0.25
+    },
+    {
+      "feature_name": "dissolved_company_count",
+      "points": 15.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "shared_address_cluster_size",
+      "points": 10.0,
+      "weight": 0.1
+    }
+  ],
+  "flags": [],
+  "generated_at": "2026-08-10T12:00:00",
+  "total": 58
+}

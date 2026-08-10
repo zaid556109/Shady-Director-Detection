@@ -1,0 +1,52 @@
+[
+  {
+    "balance_sheet": {
+      "cash": 300000.0,
+      "current_assets": 540000.0,
+      "current_liabilities": 180000.0,
+      "fixed_assets": 250000.0,
+      "long_term_liabilities": 60000.0,
+      "net_assets": 550000.0,
+      "shareholder_funds": 550000.0
+    },
+    "company_number": "01234567",
+    "currency": "GBP",
+    "extraction_confidence": 0.98,
+    "filing_year": 2024,
+    "period_end": "2024-03-31",
+    "period_start": "2023-04-01",
+    "profit_and_loss": {
+      "gross_profit": 900000.0,
+      "operating_profit": 480000.0,
+      "profit_after_tax": 368000.0,
+      "profit_before_tax": 460000.0,
+      "turnover": 2100000.0
+    },
+    "source_format": "ixbrl"
+  },
+  {
+    "balance_sheet": {
+      "cash": 250000.0,
+      "current_assets": 460000.0,
+      "current_liabilities": 170000.0,
+      "fixed_assets": 230000.0,
+      "long_term_liabilities": 70000.0,
+      "net_assets": 450000.0,
+      "shareholder_funds": 450000.0
+    },
+    "company_number": "01234567",
+    "currency": "GBP",
+    "extraction_confidence": 0.97,
+    "filing_year": 2023,
+    "period_end": "2023-03-31",
+    "period_start": "2022-04-01",
+    "profit_and_loss": {
+      "gross_profit": 760000.0,
+      "operating_profit": 390000.0,
+      "profit_after_tax": 296000.0,
+      "profit_before_tax": 370000.0,
+      "turnover": 1800000.0
+    },
+    "source_format": "ixbrl"
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "altman_z": {
+    "computable": true,
+    "reason": null,
+    "value": 4.8
+  },
+  "company_number": "01234567",
+  "current_ratio": {
+    "computable": true,
+    "reason": null,
+    "value": 3.0
+  },
+  "filing_year": 2024,
+  "gearing": {
+    "computable": true,
+    "reason": null,
+    "value": 0.44
+  },
+  "net_assets": {
+    "computable": true,
+    "reason": null,
+    "value": 550000.0
+  },
+  "yoy_trends": [
+    {
+      "delta_pct": 22.2,
+      "direction": "improving",
+      "metric": "net_assets"
+    },
+    {
+      "delta_pct": 16.7,
+      "direction": "improving",
+      "metric": "turnover"
+    }
+  ]
+}

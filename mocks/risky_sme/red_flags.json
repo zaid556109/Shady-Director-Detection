@@ -1,0 +1,41 @@
+[
+  {
+    "category": "governance",
+    "evidence": [
+      {
+        "detail": "2 dissolved companies in the last 5 years",
+        "source_id": "off-risky-001",
+        "source_type": "officer"
+      }
+    ],
+    "human_label": "A director has 2 previously dissolved companies",
+    "id": "dissolved-companies-2",
+    "severity": "warning"
+  },
+  {
+    "category": "filing",
+    "evidence": [
+      {
+        "detail": "Accounts due 2024-10-31, not yet filed",
+        "source_id": "07654321-accounts-2024",
+        "source_type": "filing"
+      }
+    ],
+    "human_label": "Statutory accounts are overdue",
+    "id": "accounts-overdue",
+    "severity": "critical"
+  },
+  {
+    "category": "financial",
+    "evidence": [
+      {
+        "detail": "Net assets -25,000 GBP as at 2023-01-31",
+        "source_id": "07654321-accounts-2023",
+        "source_type": "filing"
+      }
+    ],
+    "human_label": "Company has negative net assets (negative equity)",
+    "id": "negative-equity",
+    "severity": "critical"
+  }
+]

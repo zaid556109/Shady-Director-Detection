@@ -1,0 +1,48 @@
+{
+  "cluster_subscores": {
+    "financial": 88.0,
+    "governance": 95.0
+  },
+  "company_number": "01234567",
+  "explanation": "Strong current ratio (3.0x) and a clean history across both directors support a high reliability score; gearing is moderate but well within a comfortable range.",
+  "feature_contributions": [
+    {
+      "feature_name": "current_ratio",
+      "points": 14.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "gearing",
+      "points": 10.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "net_assets",
+      "points": 9.0,
+      "weight": 0.1
+    },
+    {
+      "feature_name": "altman_z",
+      "points": 9.0,
+      "weight": 0.1
+    },
+    {
+      "feature_name": "disqualification_flag",
+      "points": 25.0,
+      "weight": 0.25
+    },
+    {
+      "feature_name": "dissolved_company_count",
+      "points": 15.0,
+      "weight": 0.15
+    },
+    {
+      "feature_name": "shared_address_cluster_size",
+      "points": 9.0,
+      "weight": 0.1
+    }
+  ],
+  "flags": [],
+  "generated_at": "2026-08-10T12:00:00",
+  "total": 91
+}

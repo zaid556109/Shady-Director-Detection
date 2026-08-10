@@ -1,0 +1,109 @@
+{
+  "$defs": {
+    "EvidenceRef": {
+      "description": "A pointer back to the specific filing/officer record backing a RedFlag.\n\nKept generic (`source_type` + `source_id`) rather than a union of\nconcrete refs so RedFlag doesn't need to change shape as new evidence\nsources (e.g. PSC data) get added later.",
+      "example": {
+        "detail": "2 dissolved companies in the last 5 years",
+        "source_id": "abc123def456",
+        "source_type": "officer"
+      },
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable pointer, e.g. filing date.",
+          "title": "Detail"
+        },
+        "source_id": {
+          "description": "ID of the record within source_type.",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_type": {
+          "description": "e.g. 'filing', 'officer', 'appointment'.",
+          "title": "Source Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_type",
+        "source_id"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "RedFlagCategory": {
+      "enum": [
+        "governance",
+        "financial",
+        "filing"
+      ],
+      "title": "RedFlagCategory",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "warning",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "description": "A single explainable red flag with traceable evidence.",
+  "example": {
+    "category": "governance",
+    "evidence": [
+      {
+        "detail": "2 dissolved companies in the last 5 years",
+        "source_id": "abc123def456ghi789",
+        "source_type": "officer"
+      }
+    ],
+    "human_label": "A director has 2 previously dissolved companies",
+    "id": "dissolved-companies-2",
+    "severity": "warning"
+  },
+  "properties": {
+    "category": {
+      "$ref": "#/$defs/RedFlagCategory"
+    },
+    "evidence": {
+      "description": "At least one item in production; empty only in placeholder mocks.",
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "human_label": {
+      "description": "Short, UI-ready description of the flag.",
+      "title": "Human Label",
+      "type": "string"
+    },
+    "id": {
+      "description": "Stable slug, unique within one assessment (not globally).",
+      "title": "Id",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    }
+  },
+  "required": [
+    "id",
+    "severity",
+    "category",
+    "human_label"
+  ],
+  "title": "RedFlag",
+  "type": "object"
+}

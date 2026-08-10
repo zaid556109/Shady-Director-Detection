@@ -1,0 +1,25 @@
+{
+  "altman_z": {
+    "computable": false,
+    "reason": "insufficient line items filed to compute Altman Z (no P&L filed)",
+    "value": null
+  },
+  "company_number": "09999999",
+  "current_ratio": {
+    "computable": false,
+    "reason": "current_assets and current_liabilities not filed (micro-entity exemption)",
+    "value": null
+  },
+  "filing_year": 2024,
+  "gearing": {
+    "computable": false,
+    "reason": "liabilities breakdown not filed (micro-entity exemption)",
+    "value": null
+  },
+  "net_assets": {
+    "computable": true,
+    "reason": null,
+    "value": 8500.0
+  },
+  "yoy_trends": []
+}

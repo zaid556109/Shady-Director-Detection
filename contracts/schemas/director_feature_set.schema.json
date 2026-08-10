@@ -1,0 +1,163 @@
+{
+  "$defs": {
+    "CompanyDirectorAggregates": {
+      "description": "Company-level roll-up across all of `ApplicantProfile.officers`.",
+      "example": {
+        "any_disqualified": false,
+        "max_dissolved_company_count": 0,
+        "max_shared_address_cluster_size": 1,
+        "min_avg_tenure_days": 900.0,
+        "officer_count": 2
+      },
+      "properties": {
+        "any_disqualified": {
+          "title": "Any Disqualified",
+          "type": "boolean"
+        },
+        "max_dissolved_company_count": {
+          "description": "Worst dissolved-company count across all officers.",
+          "minimum": 0,
+          "title": "Max Dissolved Company Count",
+          "type": "integer"
+        },
+        "max_shared_address_cluster_size": {
+          "minimum": 1,
+          "title": "Max Shared Address Cluster Size",
+          "type": "integer"
+        },
+        "min_avg_tenure_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Avg Tenure Days"
+        },
+        "officer_count": {
+          "minimum": 0,
+          "title": "Officer Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "officer_count",
+        "max_dissolved_company_count",
+        "any_disqualified",
+        "max_shared_address_cluster_size"
+      ],
+      "title": "CompanyDirectorAggregates",
+      "type": "object"
+    },
+    "OfficerFeatures": {
+      "description": "Governance features for a single officer, aggregated across every\ncompany they've ever been appointed to (not just this one) \u2014 that\ncross-company view is the entire point of building a director graph\ninstead of reading one company's officer list in isolation.",
+      "example": {
+        "appointments_count": 3,
+        "avg_tenure_days": 1460.0,
+        "disqualification_flag": false,
+        "dissolved_company_count": 0,
+        "officer_id": "abc123def456ghi789",
+        "shared_address_cluster_size": 1
+      },
+      "properties": {
+        "appointments_count": {
+          "description": "Total companies (any status) this officer is/was appointed to.",
+          "minimum": 0,
+          "title": "Appointments Count",
+          "type": "integer"
+        },
+        "avg_tenure_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Mean days between appointed_on/resigned_on across appointments.",
+          "title": "Avg Tenure Days"
+        },
+        "disqualification_flag": {
+          "description": "True if this officer has an active/past disqualification.",
+          "title": "Disqualification Flag",
+          "type": "boolean"
+        },
+        "dissolved_company_count": {
+          "description": "Of those, how many are now dissolved/liquidated.",
+          "minimum": 0,
+          "title": "Dissolved Company Count",
+          "type": "integer"
+        },
+        "officer_id": {
+          "title": "Officer Id",
+          "type": "string"
+        },
+        "shared_address_cluster_size": {
+          "description": "Number of distinct companies registered at the same address as this officer's correspondence address (1 = no sharing detected).",
+          "minimum": 1,
+          "title": "Shared Address Cluster Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "officer_id",
+        "appointments_count",
+        "dissolved_company_count",
+        "disqualification_flag",
+        "shared_address_cluster_size"
+      ],
+      "title": "OfficerFeatures",
+      "type": "object"
+    }
+  },
+  "description": "Governance feature set for one company: per-officer detail plus\ncompany-level aggregates.",
+  "example": {
+    "aggregates": {
+      "any_disqualified": false,
+      "max_dissolved_company_count": 0,
+      "max_shared_address_cluster_size": 1,
+      "min_avg_tenure_days": 900.0,
+      "officer_count": 2
+    },
+    "company_number": "01234567",
+    "officers": [
+      {
+        "appointments_count": 3,
+        "avg_tenure_days": 1460.0,
+        "disqualification_flag": false,
+        "dissolved_company_count": 0,
+        "officer_id": "abc123def456ghi789",
+        "shared_address_cluster_size": 1
+      }
+    ]
+  },
+  "properties": {
+    "aggregates": {
+      "$ref": "#/$defs/CompanyDirectorAggregates"
+    },
+    "company_number": {
+      "title": "Company Number",
+      "type": "string"
+    },
+    "officers": {
+      "items": {
+        "$ref": "#/$defs/OfficerFeatures"
+      },
+      "title": "Officers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "company_number",
+    "aggregates"
+  ],
+  "title": "DirectorFeatureSet",
+  "type": "object"
+}

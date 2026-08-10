@@ -1,0 +1,20 @@
+{
+  "aggregates": {
+    "any_disqualified": false,
+    "max_dissolved_company_count": 0,
+    "max_shared_address_cluster_size": 1,
+    "min_avg_tenure_days": 1000.0,
+    "officer_count": 1
+  },
+  "company_number": "09999999",
+  "officers": [
+    {
+      "appointments_count": 1,
+      "avg_tenure_days": 1000.0,
+      "disqualification_flag": false,
+      "dissolved_company_count": 0,
+      "officer_id": "off-sparse-001",
+      "shared_address_cluster_size": 1
+    }
+  ]
+}

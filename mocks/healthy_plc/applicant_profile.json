@@ -1,0 +1,48 @@
+{
+  "accounts_overdue": false,
+  "company_name": "HEALTHY EXAMPLE PLC",
+  "company_number": "01234567",
+  "data_completeness": 0.98,
+  "filing_history": {
+    "last_accounts_made_up_to": "2024-03-31",
+    "last_confirmation_statement_date": "2024-06-01",
+    "late_filings_count": 0,
+    "next_accounts_due_on": "2025-12-31",
+    "total_filings": 24
+  },
+  "incorporation_date": "2005-03-11",
+  "officers": [
+    {
+      "appointed_on": "2015-06-01",
+      "name": "SMITH, John Michael",
+      "nationality": "British",
+      "occupation": "Company Director",
+      "officer_id": "off-healthy-001",
+      "resigned_on": null,
+      "role": "director"
+    },
+    {
+      "appointed_on": "2018-01-15",
+      "name": "JONES, Sarah Elizabeth",
+      "nationality": "British",
+      "occupation": "Company Director",
+      "officer_id": "off-healthy-002",
+      "resigned_on": null,
+      "role": "director"
+    }
+  ],
+  "registered_address": {
+    "address_line_1": "High Street",
+    "address_line_2": null,
+    "country": "England",
+    "locality": "London",
+    "postal_code": "EC1A 1AA",
+    "premises": "1",
+    "region": null
+  },
+  "sic_codes": [
+    "62012",
+    "62020"
+  ],
+  "status": "active"
+}
