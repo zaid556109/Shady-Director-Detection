@@ -4,7 +4,8 @@
  * `src/mocks/` directly instead (see src/pages/ReportPage.tsx).
  */
 
-import type { AssessmentJob, ScoreBreakdown } from "./types";
+import type { AssessmentJob } from "../contracts/assessment-job";
+import type { ScoreBreakdown } from "../contracts/scoring";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 

@@ -4,7 +4,7 @@
  * sync manually via `make sync-mocks` — see contracts/README.md.
  */
 
-import type { ScoreBreakdown } from "../api/types";
+import type { ScoreBreakdown } from "../contracts/scoring";
 
 import healthyScore from "./healthy_plc/score_breakdown.json";
 import riskyScore from "./risky_sme/score_breakdown.json";
