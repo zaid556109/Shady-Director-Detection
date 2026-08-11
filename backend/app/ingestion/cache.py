@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+import redis.asyncio as redis
+
 
 class ResponseCache(Protocol):
     """Cache for raw (pre-parsing) Companies House API responses."""
@@ -24,19 +26,18 @@ class ResponseCache(Protocol):
 
 
 class RedisResponseCache:
-    """Redis-backed cache. Suggested key scheme:
-    `ch:{endpoint}:{company_number_or_officer_id}`.
+    """Redis-backed cache. Key scheme: `ch:{endpoint}:{company_number_or_officer_id}`.
 
-    Suggested TTLs: company profile 1h, officers/appointments 1h, filing
-    history 15m (accounts can be filed at any time), documents indefinite
-    (a filed document never changes).
+    TTLs: company profile 1h, officers/appointments 1h, filing history 15m
+    (accounts can be filed at any time), documents indefinite.
     """
 
     def __init__(self, redis_url: str) -> None:
         self._redis_url = redis_url
+        self._client = redis.from_url(redis_url, decode_responses=True)
 
     async def get(self, key: str) -> str | None:
-        raise NotImplementedError("RedisResponseCache.get: implement with redis-py asyncio client. Owner: Person 1.")
+        return await self._client.get(key)
 
     async def set(self, key: str, value: str, ttl_seconds: int) -> None:
-        raise NotImplementedError("RedisResponseCache.set: implement with redis-py asyncio client. Owner: Person 1.")
+        await self._client.set(key, value, ex=ttl_seconds)

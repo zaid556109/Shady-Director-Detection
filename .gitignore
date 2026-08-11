@@ -30,3 +30,9 @@ frontend/.vite/
 
 # Logs
 *.log
+
+# Manual test artifacts (generated files, not source)
+backend/app/ingestion/sample_*.xhtml
+backend/app/ingestion/sample_*.json
+backend/app/ingestion/*.xhtml
+backend/app/ingestion/*.xhtml.txt

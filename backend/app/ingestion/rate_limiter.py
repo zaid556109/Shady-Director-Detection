@@ -1,50 +1,51 @@
 """Rate-limiter interface for the Companies House API.
 
 CH allows 600 requests / 5 minutes per API key (see .env.example
-CH_RATE_LIMIT_REQUESTS / CH_RATE_LIMIT_WINDOW_SECONDS). A full assessment
-makes on the order of 10-30 CH calls (company profile, officers list, one
-appointments-history call per officer, filing history, one document-download
-per accounts filing), so a single assessment is nowhere near the limit — the
-limiter exists to protect against many *concurrent* assessments (Celery
-workers) exhausting it together.
-
-This module defines the interface only; `TokenBucketRateLimiter` is the
-concrete implementation Person 1 will fill in (backed by Redis so it's
-shared across worker processes, not per-process in-memory).
+CH_RATE_LIMIT_REQUESTS / CH_RATE_LIMIT_WINDOW_SECONDS). This module defines
+the interface only; `TokenBucketRateLimiter` is the concrete implementation,
+backed by Redis so it's shared across worker processes, not per-process
+in-memory.
 """
 
 from __future__ import annotations
 
+import asyncio
 from typing import Protocol
+
+import redis.asyncio as redis
 
 
 class RateLimiter(Protocol):
     """Something that can gate outbound Companies House requests."""
 
     async def acquire(self) -> None:
-        """Block (async) until a request slot is available.
-
-        Implementations should raise on misconfiguration but never on
-        contention — contention means waiting, not erroring.
-        """
+        """Block (async) until a request slot is available."""
         ...
 
 
 class TokenBucketRateLimiter:
-    """Redis-backed token bucket, shared across worker processes.
+    """Redis-backed fixed-window counter, shared across worker processes.
 
-    Bucket capacity = CH_RATE_LIMIT_REQUESTS, refill window =
-    CH_RATE_LIMIT_WINDOW_SECONDS (see app.config.settings).
+    Capacity = CH_RATE_LIMIT_REQUESTS, window = CH_RATE_LIMIT_WINDOW_SECONDS
+    (see app.config.settings).
     """
 
     def __init__(self, redis_url: str, capacity: int, window_seconds: int) -> None:
         self._redis_url = redis_url
+        self._client = redis.from_url(redis_url, decode_responses=True)
         self._capacity = capacity
         self._window_seconds = window_seconds
+        self._key = "ch:rate_limit:counter"
 
     async def acquire(self) -> None:
-        raise NotImplementedError(
-            "TokenBucketRateLimiter.acquire: implement using a Redis-backed "
-            "token bucket (e.g. INCR + EXPIRE or a sorted-set sliding window). "
-            "Owner: Person 1."
-        )
+        while True:
+            current = await self._client.incr(self._key)
+            if current == 1:
+                await self._client.expire(self._key, self._window_seconds)
+
+            if current <= self._capacity:
+                return
+
+            ttl = await self._client.ttl(self._key)
+            wait_time = ttl if ttl > 0 else 1
+            await asyncio.sleep(wait_time)
