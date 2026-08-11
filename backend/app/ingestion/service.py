@@ -12,6 +12,7 @@ from datetime import date
 from contracts import Address, ApplicantProfile, CompanyStatus, FilingHistorySummary, OfficerSummary
 
 from app.ingestion.client import CompaniesHouseClient
+from app.utils.mock_loader import MOCK_COMPANY_NUMBERS, load_mock_model, resolve_scenario
 
 
 def _map_status(raw_status: str) -> CompanyStatus:
@@ -101,8 +102,21 @@ def _compute_completeness(profile: dict, officers: list, filings: list) -> float
     return round(score, 2)
 
 
-async def build_applicant_profile(company_number: str, client: CompaniesHouseClient) -> ApplicantProfile:
-    """Assemble a normalized ApplicantProfile for `company_number` using live CH data."""
+async def build_applicant_profile(company_number: str, client: CompaniesHouseClient | None = None) -> ApplicantProfile:
+    """Assemble a normalized ApplicantProfile for `company_number`.
+
+    Known mock company numbers (MOCK_COMPANY_NUMBERS — used by
+    test_pipeline.py's day-1 demo guarantee and the frontend's mocked
+    dashboard) always resolve via the mock loader, matching the pattern
+    app.financials.service uses. Any other company number requires a real
+    `client` and hits live CH data; when no client is supplied (e.g. the
+    synchronous /report demo path), it falls back to the sparse_micro mock
+    too, so an unrecognized number still produces a plausible result
+    instead of erroring — see mock_loader.resolve_scenario.
+    """
+    if client is None or company_number in MOCK_COMPANY_NUMBERS:
+        scenario = resolve_scenario(company_number)
+        return load_mock_model(scenario, "applicant_profile.json", ApplicantProfile)
 
     raw_profile = await client.fetch_company_profile(company_number)
     raw_officers = await client.fetch_officers(company_number)

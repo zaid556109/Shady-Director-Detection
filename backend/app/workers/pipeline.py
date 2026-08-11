@@ -8,6 +8,8 @@ backend/tests/test_pipeline.py) without a broker or database running —
 
 from __future__ import annotations
 
+import asyncio
+
 from app.contracts import DirectorFeatureSet, FinancialExtract, RatioSet, RedFlag, ScoreBreakdown
 from app.director_features import build_features
 from app.financials import compute_ratios, extract_financials
@@ -39,11 +41,14 @@ def run_assessment_pipeline(company_number: str) -> PipelineResult:
     """Run ingestion -> financials -> director_features -> scoring in order.
 
     This is the "demo pipeline" that must work end-to-end on mock data from
-    commit 1 (see README "The pipeline"). Each step currently returns mock
-    data resolved from `company_number`; swapping any one step for a real
-    implementation doesn't change this function.
+    commit 1 (see README "The pipeline"). Financials and director_features
+    still return mock data resolved from `company_number`; ingestion now
+    has a real (async) implementation, called here with no client so it
+    falls back to mock data too — see app.ingestion.service for the
+    real-vs-mock split. Wiring a real client through for genuine live
+    assessments is Person 5's remaining integration task.
     """
-    profile = build_applicant_profile(company_number)
+    profile = asyncio.run(build_applicant_profile(company_number))
 
     financial_extracts = extract_financials(profile)
     ratios = compute_ratios(financial_extracts)
