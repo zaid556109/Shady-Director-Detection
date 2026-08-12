@@ -13,9 +13,10 @@ nodes are keyed by company_number.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-import networkx as nx
 
+import networkx as nx
 from contracts import Address, CompanyStatus
+
 from app.contracts import ApplicantProfile
 
 if TYPE_CHECKING:
@@ -83,11 +84,16 @@ async def build_director_graph(
     G = nx.Graph()
 
     # Add primary company node
+    status_str = (
+        profile.status.value
+        if isinstance(profile.status, CompanyStatus)
+        else str(profile.status)
+    )
     G.add_node(
         profile.company_number,
         type="company",
         name=profile.company_name,
-        status=profile.status.value if isinstance(profile.status, CompanyStatus) else str(profile.status),
+        status=status_str,
         registered_address=profile.registered_address,
     )
 
@@ -134,7 +140,11 @@ async def build_director_graph(
                 if not comp_num:
                     continue
 
-                comp_status = appointed_to.get("company_status") or appt.get("company_status") or "active"
+                comp_status = (
+                    appointed_to.get("company_status")
+                    or appt.get("company_status")
+                    or "active"
+                )
                 raw_addr = appointed_to.get("registered_office_address") or appt.get("address")
                 comp_addr = _parse_address(raw_addr)
                 comp_name = appointed_to.get("company_name") or appt.get("company_name") or ""
@@ -161,4 +171,5 @@ async def build_director_graph(
                 )
 
     return G
+
 

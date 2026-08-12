@@ -10,12 +10,12 @@ from datetime import date
 from typing import TYPE_CHECKING, Any
 
 from app.contracts import (
+    ApplicantProfile,
     CompanyDirectorAggregates,
     DirectorFeatureSet,
     OfficerFeatures,
     RedFlag,
 )
-from app.contracts import ApplicantProfile
 from app.director_features.graph import build_director_graph, normalize_address
 from app.director_features.red_flags import (
     detect_disqualification_flags,
@@ -66,7 +66,13 @@ async def build_features(
             dissolved_count = sum(
                 1 for nbr in company_neighbors
                 if str(graph.nodes[nbr].get("status", "")).lower()
-                in ("dissolved", "liquidation", "receivership", "administration", "voluntary-arrangement")
+                in (
+                    "dissolved",
+                    "liquidation",
+                    "receivership",
+                    "administration",
+                    "voluntary-arrangement",
+                )
             )
 
             disqualified = bool(graph.nodes[officer_id].get("disqualified", False))
@@ -95,7 +101,8 @@ async def build_features(
             if target_norm_addr:
                 total_in_graph = sum(
                     1 for n, data in graph.nodes(data=True)
-                    if data.get("type") == "company" and normalize_address(data.get("registered_address")) == target_norm_addr
+                    if data.get("type") == "company"
+                    and normalize_address(data.get("registered_address")) == target_norm_addr
                 )
                 cluster_size = max(1, total_in_graph)
 
@@ -124,9 +131,13 @@ async def build_features(
     officer_count = len(officer_features_list)
     max_dissolved = max((o.dissolved_company_count for o in officer_features_list), default=0)
     any_disqualified = any(o.disqualification_flag for o in officer_features_list)
-    max_shared_cluster = max((o.shared_address_cluster_size for o in officer_features_list), default=1)
+    max_shared_cluster = max(
+        (o.shared_address_cluster_size for o in officer_features_list), default=1
+    )
 
-    valid_tenures = [o.avg_tenure_days for o in officer_features_list if o.avg_tenure_days is not None]
+    valid_tenures = [
+        o.avg_tenure_days for o in officer_features_list if o.avg_tenure_days is not None
+    ]
     min_avg_tenure = min(valid_tenures) if valid_tenures else None
 
     aggregates = CompanyDirectorAggregates(
@@ -150,4 +161,5 @@ async def build_features(
     flags.extend(detect_filing_lateness_flags(profile))
 
     return feature_set, flags
+
 

@@ -9,8 +9,8 @@ existing ones, and lets tests target one flag type at a time.
 from __future__ import annotations
 
 import networkx as nx
-
 from contracts import EvidenceRef, RedFlagCategory, Severity
+
 from app.contracts import ApplicantProfile, RedFlag
 from app.director_features.graph import normalize_address
 
@@ -35,7 +35,13 @@ def detect_dissolved_company_flags(profile: ApplicantProfile, graph: nx.Graph) -
             node_data = graph.nodes[nbr]
             if node_data.get("type") == "company" and nbr != profile.company_number:
                 status = str(node_data.get("status", "")).lower()
-                if status in ("dissolved", "liquidation", "receivership", "administration", "voluntary-arrangement"):
+                if status in (
+                    "dissolved",
+                    "liquidation",
+                    "receivership",
+                    "administration",
+                    "voluntary-arrangement",
+                ):
                     dissolved_companies.append(nbr)
 
         count = len(dissolved_companies)
@@ -57,7 +63,10 @@ def detect_dissolved_company_flags(profile: ApplicantProfile, graph: nx.Graph) -
                 )
             )
         elif count >= 2:
-            detail_str = f"{count} dissolved companies in the last 5 years ({', '.join(dissolved_companies)})"
+            detail_str = (
+                f"{count} dissolved companies in the last 5 years "
+                f"({', '.join(dissolved_companies)})"
+            )
             flags.append(
                 RedFlag(
                     id=f"dissolved-companies-{count}",
@@ -109,7 +118,9 @@ def detect_disqualification_flags(profile: ApplicantProfile, graph: nx.Graph) ->
                             detail=f"Disqualification record detected for director {officer.name}",
                         )
                     ],
-                    human_label=f"Director {officer.name} has an active or historical disqualification",
+                    human_label=(
+                        f"Director {officer.name} has an active or historical disqualification"
+                    ),
                 )
             )
 
@@ -139,6 +150,7 @@ def detect_shared_address_flags(profile: ApplicantProfile, graph: nx.Graph) -> l
     cluster_size = len(cluster_companies)
 
     if cluster_size >= 15:
+        addr_str = profile.registered_address.postal_code or "shared address"
         flags.append(
             RedFlag(
                 id=f"shared-address-cluster-{cluster_size}",
@@ -148,13 +160,14 @@ def detect_shared_address_flags(profile: ApplicantProfile, graph: nx.Graph) -> l
                     EvidenceRef(
                         source_type="company",
                         source_id=profile.company_number,
-                        detail=f"{cluster_size} companies registered at address: {profile.registered_address.postal_code or 'shared address'}",
+                        detail=f"{cluster_size} companies registered at address: {addr_str}",
                     )
                 ],
                 human_label=f"{cluster_size} companies registered at the same address",
             )
         )
     elif cluster_size >= 5:
+        addr_str = profile.registered_address.postal_code or "shared address"
         flags.append(
             RedFlag(
                 id=f"shared-address-cluster-{cluster_size}",
@@ -164,7 +177,7 @@ def detect_shared_address_flags(profile: ApplicantProfile, graph: nx.Graph) -> l
                     EvidenceRef(
                         source_type="company",
                         source_id=profile.company_number,
-                        detail=f"{cluster_size} companies registered at address: {profile.registered_address.postal_code or 'shared address'}",
+                        detail=f"{cluster_size} companies registered at address: {addr_str}",
                     )
                 ],
                 human_label=f"{cluster_size} companies registered at the same address",
@@ -238,4 +251,5 @@ def detect_filing_lateness_flags(profile: ApplicantProfile) -> list[RedFlag]:
         )
 
     return flags
+
 
