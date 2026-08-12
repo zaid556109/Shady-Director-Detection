@@ -123,8 +123,12 @@ class FeatureSet(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     company_number: Mapped[str] = mapped_column(ForeignKey("companies.company_number"), index=True)
-    features: Mapped[dict[str, Any]] = mapped_column(JSON, comment="DirectorFeatureSet.model_dump()")
-    red_flags: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, comment="list[RedFlag].model_dump()")
+    features: Mapped[dict[str, Any]] = mapped_column(
+        JSON, comment="DirectorFeatureSet.model_dump()"
+    )
+    red_flags: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON, default=list, comment="list[RedFlag].model_dump()"
+    )
 
     company: Mapped["Company"] = relationship(back_populates="feature_sets")
 
@@ -136,7 +140,9 @@ class Score(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     company_number: Mapped[str] = mapped_column(ForeignKey("companies.company_number"), index=True)
-    job_id: Mapped[str | None] = mapped_column(ForeignKey("assessment_jobs.job_id"), nullable=True, index=True)
+    job_id: Mapped[str | None] = mapped_column(
+        ForeignKey("assessment_jobs.job_id"), nullable=True, index=True
+    )
     total: Mapped[int] = mapped_column(Integer)
     breakdown: Mapped[dict[str, Any]] = mapped_column(JSON, comment="ScoreBreakdown.model_dump()")
 
@@ -148,7 +154,9 @@ class AssessmentJob(TimestampMixin, Base):
 
     # Not FK-constrained to companies.company_number: a job can be created
     # (and start running ingestion) before we have a companies row for it.
-    job_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    job_id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
     company_number: Mapped[str] = mapped_column(String(16), index=True)
     status: Mapped[str] = mapped_column(String(16), default="pending")
     stage: Mapped[str | None] = mapped_column(String(32), nullable=True)

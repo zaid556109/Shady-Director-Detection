@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from app.ingestion.client import CompaniesHouseClient
 
 
-
 class PipelineResult:
     """Every intermediate artifact from one pipeline run, not just the final
     score — useful for tests/debugging and for persisting each stage's
@@ -42,7 +41,9 @@ class PipelineResult:
         self.breakdown = breakdown
 
 
-async def _run_pipeline_async(company_number: str, client: CompaniesHouseClient | None = None) -> PipelineResult:
+async def _run_pipeline_async(
+    company_number: str, client: CompaniesHouseClient | None = None
+) -> PipelineResult:
     profile = await build_applicant_profile(company_number, client=client)
 
     financial_extracts = extract_financials(profile)
@@ -61,7 +62,9 @@ async def _run_pipeline_async(company_number: str, client: CompaniesHouseClient 
     )
 
 
-def run_assessment_pipeline(company_number: str, client: CompaniesHouseClient | None = None) -> PipelineResult:
+def run_assessment_pipeline(
+    company_number: str, client: CompaniesHouseClient | None = None
+) -> PipelineResult:
     """Run ingestion -> financials -> director_features -> scoring in order.
 
     This is the "demo pipeline" that must work end-to-end on mock data from
@@ -69,4 +72,3 @@ def run_assessment_pipeline(company_number: str, client: CompaniesHouseClient | 
     ingestion and director_features now have real async implementations.
     """
     return asyncio.run(_run_pipeline_async(company_number, client=client))
-

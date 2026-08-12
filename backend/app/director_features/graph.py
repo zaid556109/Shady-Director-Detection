@@ -85,9 +85,7 @@ async def build_director_graph(
 
     # Add primary company node
     status_str = (
-        profile.status.value
-        if isinstance(profile.status, CompanyStatus)
-        else str(profile.status)
+        profile.status.value if isinstance(profile.status, CompanyStatus) else str(profile.status)
     )
     G.add_node(
         profile.company_number,
@@ -141,9 +139,7 @@ async def build_director_graph(
                     continue
 
                 comp_status = (
-                    appointed_to.get("company_status")
-                    or appt.get("company_status")
-                    or "active"
+                    appointed_to.get("company_status") or appt.get("company_status") or "active"
                 )
                 raw_addr = appointed_to.get("registered_office_address") or appt.get("address")
                 comp_addr = _parse_address(raw_addr)
@@ -171,5 +167,3 @@ async def build_director_graph(
                 )
 
     return G
-
-

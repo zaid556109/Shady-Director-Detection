@@ -175,7 +175,9 @@ def test_detect_disqualification_flags(simple_profile: ApplicantProfile) -> None
     assert "disqualified-director-off-001" in flags[0].id
 
 
-def test_detect_shared_address_flags(simple_profile: ApplicantProfile, base_address: Address) -> None:
+def test_detect_shared_address_flags(
+    simple_profile: ApplicantProfile, base_address: Address
+) -> None:
     G = nx.Graph()
 
     # 4 companies at address -> 0 flags

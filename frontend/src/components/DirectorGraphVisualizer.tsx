@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import type { OfficerSummary } from "../contracts/applicant";
+import type { OfficerFeatures } from "../contracts/director-features";
 import { mockApplicantProfile, mockDirectorFeatureSet } from "../mocks";
-
-interface Props {
-  companyNumber: string;
-}
 
 interface Node {
   id: string;
@@ -23,7 +21,7 @@ interface Edge {
   label?: string;
 }
 
-export default function DirectorGraphVisualizer({ companyNumber }: Props) {
+export default function DirectorGraphVisualizer({ companyNumber }: { companyNumber: string }) {
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
 
   const featureSet = mockDirectorFeatureSet(companyNumber);
@@ -51,9 +49,9 @@ export default function DirectorGraphVisualizer({ companyNumber }: Props) {
 
   // 2. Director Nodes (Middle Row)
   const numOfficers = Math.max(officers.length, 1);
-  officers.forEach((off: any, idx: number) => {
+  officers.forEach((off: OfficerSummary, idx: number) => {
     const offId = off.officer_id || `off-${idx}`;
-    const feat = officerFeatures.find((f: any) => f.officer_id === offId) || {};
+    const feat: Partial<OfficerFeatures> = officerFeatures.find((f: OfficerFeatures) => f.officer_id === offId) || {};
 
     // Center officers horizontally
     const step = 300 / (numOfficers + 1);

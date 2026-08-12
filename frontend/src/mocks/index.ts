@@ -4,6 +4,8 @@
  * sync manually via `make sync-mocks` — see contracts/README.md.
  */
 
+import type { ApplicantProfile } from "../contracts/applicant";
+import type { DirectorFeatureSet } from "../contracts/director-features";
 import type { ScoreBreakdown } from "../contracts/scoring";
 
 import healthyScore from "./healthy_plc/score_breakdown.json";
@@ -24,16 +26,16 @@ const MOCK_COMPANY_NUMBERS: Record<string, ScoreBreakdown> = {
   "09999999": sparseScore as ScoreBreakdown,
 };
 
-const MOCK_FEATURES: Record<string, any> = {
-  "01234567": healthyFeature,
-  "07654321": riskyFeature,
-  "09999999": sparseFeature,
+const MOCK_FEATURES: Record<string, DirectorFeatureSet> = {
+  "01234567": healthyFeature as unknown as DirectorFeatureSet,
+  "07654321": riskyFeature as unknown as DirectorFeatureSet,
+  "09999999": sparseFeature as unknown as DirectorFeatureSet,
 };
 
-const MOCK_PROFILES: Record<string, any> = {
-  "01234567": healthyProfile,
-  "07654321": riskyProfile,
-  "09999999": sparseProfile,
+const MOCK_PROFILES: Record<string, ApplicantProfile> = {
+  "01234567": healthyProfile as unknown as ApplicantProfile,
+  "07654321": riskyProfile as unknown as ApplicantProfile,
+  "09999999": sparseProfile as unknown as ApplicantProfile,
 };
 
 const DEFAULT_SCENARIO = sparseScore as ScoreBreakdown;
@@ -42,11 +44,12 @@ export function mockScoreBreakdown(companyNumber: string): ScoreBreakdown {
   return MOCK_COMPANY_NUMBERS[companyNumber] ?? DEFAULT_SCENARIO;
 }
 
-export function mockDirectorFeatureSet(companyNumber: string): any {
-  return MOCK_FEATURES[companyNumber] ?? sparseFeature;
+export function mockDirectorFeatureSet(companyNumber: string): DirectorFeatureSet {
+  return MOCK_FEATURES[companyNumber] ?? (sparseFeature as unknown as DirectorFeatureSet);
 }
 
-export function mockApplicantProfile(companyNumber: string): any {
-  return MOCK_PROFILES[companyNumber] ?? sparseProfile;
+export function mockApplicantProfile(companyNumber: string): ApplicantProfile {
+  return MOCK_PROFILES[companyNumber] ?? (sparseProfile as unknown as ApplicantProfile);
 }
+
 

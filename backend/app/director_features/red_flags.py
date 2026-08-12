@@ -251,5 +251,3 @@ def detect_filing_lateness_flags(profile: ApplicantProfile) -> list[RedFlag]:
         )
 
     return flags
-
-

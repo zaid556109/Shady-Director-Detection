@@ -58,13 +58,15 @@ async def build_features(
 
         if officer_id in graph:
             company_neighbors = [
-                nbr for nbr in graph.neighbors(officer_id)
+                nbr
+                for nbr in graph.neighbors(officer_id)
                 if graph.nodes[nbr].get("type") == "company"
             ]
             appointments_count = len(company_neighbors)
 
             dissolved_count = sum(
-                1 for nbr in company_neighbors
+                1
+                for nbr in company_neighbors
                 if str(graph.nodes[nbr].get("status", "")).lower()
                 in (
                     "dissolved",
@@ -100,7 +102,8 @@ async def build_features(
             cluster_size = 1
             if target_norm_addr:
                 total_in_graph = sum(
-                    1 for n, data in graph.nodes(data=True)
+                    1
+                    for n, data in graph.nodes(data=True)
                     if data.get("type") == "company"
                     and normalize_address(data.get("registered_address")) == target_norm_addr
                 )
@@ -161,5 +164,3 @@ async def build_features(
     flags.extend(detect_filing_lateness_flags(profile))
 
     return feature_set, flags
-
-

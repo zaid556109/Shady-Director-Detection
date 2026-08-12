@@ -18,7 +18,14 @@ from app.ingestion.rate_limiter import RateLimiter
 class CompaniesHouseClient:
     """Thin async HTTP client over the Companies House REST + Document APIs."""
 
-    def __init__(self, api_key: str, base_url: str, document_base_url: str, rate_limiter: RateLimiter, cache: ResponseCache) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str,
+        document_base_url: str,
+        rate_limiter: RateLimiter,
+        cache: ResponseCache,
+    ) -> None:
         self._api_key = api_key
         self._base_url = base_url
         self._document_base_url = document_base_url

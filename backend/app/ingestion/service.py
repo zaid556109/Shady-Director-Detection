@@ -73,7 +73,9 @@ def _build_filing_summary(raw_profile: dict, raw_filings: list[dict]) -> FilingH
     sorted_filings = sorted(raw_filings, key=lambda f: f.get("date") or "", reverse=True)
 
     accounts_filings = [f for f in sorted_filings if f.get("category") == "accounts"]
-    confirmation_filings = [f for f in sorted_filings if f.get("category") == "confirmation-statement"]
+    confirmation_filings = [
+        f for f in sorted_filings if f.get("category") == "confirmation-statement"
+    ]
 
     last_accounts = accounts_filings[0] if accounts_filings else None
     last_confirmation = confirmation_filings[0] if confirmation_filings else None
@@ -85,14 +87,22 @@ def _build_filing_summary(raw_profile: dict, raw_filings: list[dict]) -> FilingH
     return FilingHistorySummary(
         last_accounts_made_up_to=_extract_made_up_date(last_accounts) if last_accounts else None,
         next_accounts_due_on=next_due,
-        last_confirmation_statement_date=_extract_made_up_date(last_confirmation) if last_confirmation else None,
+        last_confirmation_statement_date=_extract_made_up_date(last_confirmation)
+        if last_confirmation
+        else None,
         total_filings=len(raw_filings),
         late_filings_count=late_count,
     )
 
 
 def _compute_completeness(profile: dict, officers: list, filings: list) -> float:
-    expected_fields = ["company_name", "company_status", "date_of_creation", "sic_codes", "registered_office_address"]
+    expected_fields = [
+        "company_name",
+        "company_status",
+        "date_of_creation",
+        "sic_codes",
+        "registered_office_address",
+    ]
     present = sum(1 for f in expected_fields if profile.get(f))
     score = present / len(expected_fields)
     if not officers:
@@ -102,7 +112,9 @@ def _compute_completeness(profile: dict, officers: list, filings: list) -> float
     return round(score, 2)
 
 
-async def build_applicant_profile(company_number: str, client: CompaniesHouseClient | None = None) -> ApplicantProfile:
+async def build_applicant_profile(
+    company_number: str, client: CompaniesHouseClient | None = None
+) -> ApplicantProfile:
     """Assemble a normalized ApplicantProfile for `company_number`.
 
     Known mock company numbers (MOCK_COMPANY_NUMBERS — used by
