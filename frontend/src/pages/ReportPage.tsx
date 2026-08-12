@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 
+import DirectorGraphVisualizer from "../components/DirectorGraphVisualizer";
 import { mockScoreBreakdown } from "../mocks";
 
 function scoreTier(total: number): "good" | "warn" | "bad" {
@@ -125,10 +126,9 @@ export default function ReportPage() {
 
       <div className="card">
         <h2>Director graph</h2>
-        <div className="graph-placeholder">
-          Director&ndash;company graph visualization goes here (Person 3)
-        </div>
+        <DirectorGraphVisualizer companyNumber={breakdown.company_number} />
       </div>
     </>
   );
 }
+
