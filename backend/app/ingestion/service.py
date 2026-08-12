@@ -8,6 +8,7 @@ into ApplicantProfile.
 from __future__ import annotations
 
 from datetime import date
+from typing import Any, cast
 
 from contracts import Address, ApplicantProfile, CompanyStatus, FilingHistorySummary, OfficerSummary
 
@@ -22,7 +23,7 @@ def _map_status(raw_status: str) -> CompanyStatus:
         return CompanyStatus.OTHER
 
 
-def _map_address(raw: dict) -> Address:
+def _map_address(raw: dict[str, Any]) -> Address:
     return Address(
         premises=raw.get("premises"),
         address_line_1=raw.get("address_line_1"),
@@ -34,7 +35,7 @@ def _map_address(raw: dict) -> Address:
     )
 
 
-def _map_officers(raw_officers: list[dict]) -> list[OfficerSummary]:
+def _map_officers(raw_officers: list[dict[str, Any]]) -> list[OfficerSummary]:
     officers = []
     for o in raw_officers:
         appt_link = o.get("links", {}).get("officer", {}).get("appointments", "")
@@ -53,7 +54,7 @@ def _map_officers(raw_officers: list[dict]) -> list[OfficerSummary]:
     return officers
 
 
-def _extract_made_up_date(filing: dict) -> str | None:
+def _extract_made_up_date(filing: dict[str, Any]) -> str | None:
     """Prefer the real period/statement end date from description_values
     (e.g. 'made_up_date') over the filing submission date, since CH's top
     level `date` field is when it was FILED, not the period it covers.
@@ -63,11 +64,13 @@ def _extract_made_up_date(filing: dict) -> str | None:
     description_values = filing.get("description_values") or {}
     made_up_date = description_values.get("made_up_date")
     if made_up_date:
-        return made_up_date
-    return filing.get("date")
+        return cast(str, made_up_date)
+    return cast(str | None, filing.get("date"))
 
 
-def _build_filing_summary(raw_profile: dict, raw_filings: list[dict]) -> FilingHistorySummary:
+def _build_filing_summary(
+    raw_profile: dict[str, Any], raw_filings: list[dict[str, Any]]
+) -> FilingHistorySummary:
     # Sort newest-first defensively rather than trusting API order, so
     # "most recent" is always correct even if CH ever changes ordering.
     sorted_filings = sorted(raw_filings, key=lambda f: f.get("date") or "", reverse=True)
@@ -95,7 +98,9 @@ def _build_filing_summary(raw_profile: dict, raw_filings: list[dict]) -> FilingH
     )
 
 
-def _compute_completeness(profile: dict, officers: list, filings: list) -> float:
+def _compute_completeness(
+    profile: dict[str, Any], officers: list[dict[str, Any]], filings: list[dict[str, Any]]
+) -> float:
     expected_fields = [
         "company_name",
         "company_status",

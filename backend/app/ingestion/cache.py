@@ -37,7 +37,10 @@ class RedisResponseCache:
         self._client = redis.from_url(redis_url, decode_responses=True)
 
     async def get(self, key: str) -> str | None:
-        return await self._client.get(key)
+        res = await self._client.get(key)
+        if isinstance(res, bytes):
+            return res.decode("utf-8")
+        return res
 
     async def set(self, key: str, value: str, ttl_seconds: int) -> None:
         await self._client.set(key, value, ex=ttl_seconds)

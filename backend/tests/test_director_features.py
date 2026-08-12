@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Any
+
 import networkx as nx
 import pytest
-
 from contracts import (
     Address,
     ApplicantProfile,
@@ -14,10 +14,10 @@ from contracts import (
     DirectorFeatureSet,
     FilingHistorySummary,
     OfficerSummary,
-    RedFlag,
     Severity,
 )
-from app.director_features.graph import build_director_graph, normalize_address
+
+from app.director_features.graph import build_director_graph
 from app.director_features.red_flags import (
     detect_disqualification_flags,
     detect_dissolved_company_flags,

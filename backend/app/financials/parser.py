@@ -20,8 +20,9 @@ does one document -> BalanceSheetItems/ProfitAndLossItems.
 
 from __future__ import annotations
 
-from bs4 import BeautifulSoup
+from typing import Any, cast
 
+from bs4 import BeautifulSoup
 from contracts import BalanceSheetItems, ProfitAndLossItems
 
 # ---------------------------------------------------------------------------
@@ -65,12 +66,13 @@ PROFIT_AND_LOSS_CONCEPTS: dict[str, list[str]] = {
 }
 
 
-def _extract_all_facts(soup: BeautifulSoup) -> list[dict]:
+def _extract_all_facts(soup: BeautifulSoup) -> list[dict[str, Any]]:
     """Pull every ix:nonfraction fact out of the parsed document."""
-    facts: list[dict] = []
+    facts: list[dict[str, Any]] = []
     for tag in soup.find_all("ix:nonfraction"):
-        name = tag.get("name", "")
-        concept = name.split(":")[-1] if name else ""
+        name_attr = tag.get("name", "")
+        name_str = name_attr if isinstance(name_attr, str) else str(name_attr)
+        concept = name_str.split(":")[-1] if name_str else ""
         sign = tag.get("sign", "")
         raw_value = tag.get_text(strip=True).replace(",", "")
         try:
@@ -84,12 +86,12 @@ def _extract_all_facts(soup: BeautifulSoup) -> list[dict]:
     return facts
 
 
-def _find_first_match(facts: list[dict], keywords: list[str]) -> float | None:
+def _find_first_match(facts: list[dict[str, Any]], keywords: list[str]) -> float | None:
     """First fact whose concept name contains any of the given keywords."""
     for kw in keywords:
         for fact in facts:
             if kw.lower() in fact["concept"].lower() and fact["value"] is not None:
-                return fact["value"]
+                return cast(float | None, fact["value"])
     return None
 
 

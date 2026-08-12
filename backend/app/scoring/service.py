@@ -6,10 +6,10 @@ the frontend Report page render.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.contracts import DirectorFeatureSet, RatioSet, RedFlag, ScoreBreakdown
-from app.scoring import scorecard, explain
+from app.scoring import explain, scorecard
 
 
 def score(ratios: RatioSet, features: DirectorFeatureSet, flags: list[RedFlag]) -> ScoreBreakdown:
@@ -29,5 +29,5 @@ def score(ratios: RatioSet, features: DirectorFeatureSet, flags: list[RedFlag]) 
         feature_contributions=contributions,
         flags=flags,
         explanation=explanation,
-        generated_at=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
     )

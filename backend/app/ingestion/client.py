@@ -7,7 +7,7 @@ password. Rate limit: 600 requests / 5 minutes per key.
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -35,7 +35,7 @@ class CompaniesHouseClient:
     async def _get(self, url: str, cache_key: str, ttl_seconds: int = 3600) -> dict[str, Any]:
         cached = await self._cache.get(cache_key)
         if cached is not None:
-            return json.loads(cached)
+            return cast(dict[str, Any], json.loads(cached))
 
         await self._rate_limiter.acquire()
 
@@ -45,7 +45,7 @@ class CompaniesHouseClient:
             data = response.json()
 
         await self._cache.set(cache_key, json.dumps(data), ttl_seconds)
-        return data
+        return cast(dict[str, Any], data)
 
     async def fetch_company_profile(self, company_number: str) -> dict[str, Any]:
         """GET /company/{company_number}"""
@@ -56,19 +56,19 @@ class CompaniesHouseClient:
         """GET /company/{company_number}/officers"""
         url = f"{self._base_url}/company/{company_number}/officers"
         data = await self._get(url, cache_key=f"ch:officers:{company_number}", ttl_seconds=3600)
-        return data.get("items", [])
+        return cast(list[dict[str, Any]], data.get("items", []))
 
     async def fetch_officer_appointments(self, officer_id: str) -> list[dict[str, Any]]:
         """GET /officers/{officer_id}/appointments"""
         url = f"{self._base_url}/officers/{officer_id}/appointments"
         data = await self._get(url, cache_key=f"ch:appointments:{officer_id}", ttl_seconds=3600)
-        return data.get("items", [])
+        return cast(list[dict[str, Any]], data.get("items", []))
 
     async def fetch_filing_history(self, company_number: str) -> list[dict[str, Any]]:
         """GET /company/{company_number}/filing-history"""
         url = f"{self._base_url}/company/{company_number}/filing-history"
         data = await self._get(url, cache_key=f"ch:filings:{company_number}", ttl_seconds=900)
-        return data.get("items", [])
+        return cast(list[dict[str, Any]], data.get("items", []))
 
     async def fetch_filing_document(self, document_metadata_url: str) -> bytes:
         """Document API: GET {document_metadata_url}/content, following the

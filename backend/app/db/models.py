@@ -45,11 +45,11 @@ class Company(TimestampMixin, Base):
     accounts_overdue: Mapped[bool] = mapped_column(Boolean, default=False)
     data_completeness: Mapped[float] = mapped_column(Float, default=0.0)
 
-    appointments: Mapped[list["Appointment"]] = relationship(back_populates="company")
-    filings: Mapped[list["Filing"]] = relationship(back_populates="company")
-    financial_extracts: Mapped[list["FinancialExtractRow"]] = relationship(back_populates="company")
-    feature_sets: Mapped[list["FeatureSet"]] = relationship(back_populates="company")
-    scores: Mapped[list["Score"]] = relationship(back_populates="company")
+    appointments: Mapped[list[Appointment]] = relationship(back_populates="company")
+    filings: Mapped[list[Filing]] = relationship(back_populates="company")
+    financial_extracts: Mapped[list[FinancialExtractRow]] = relationship(back_populates="company")
+    feature_sets: Mapped[list[FeatureSet]] = relationship(back_populates="company")
+    scores: Mapped[list[Score]] = relationship(back_populates="company")
 
 
 class Officer(TimestampMixin, Base):
@@ -64,7 +64,7 @@ class Officer(TimestampMixin, Base):
     nationality: Mapped[str | None] = mapped_column(String(64), nullable=True)
     occupation: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
-    appointments: Mapped[list["Appointment"]] = relationship(back_populates="officer")
+    appointments: Mapped[list[Appointment]] = relationship(back_populates="officer")
 
 
 class Appointment(TimestampMixin, Base):
@@ -77,8 +77,8 @@ class Appointment(TimestampMixin, Base):
     appointed_on: Mapped[date | None] = mapped_column(Date, nullable=True)
     resigned_on: Mapped[date | None] = mapped_column(Date, nullable=True)
 
-    officer: Mapped["Officer"] = relationship(back_populates="appointments")
-    company: Mapped["Company"] = relationship(back_populates="appointments")
+    officer: Mapped[Officer] = relationship(back_populates="appointments")
+    company: Mapped[Company] = relationship(back_populates="appointments")
 
 
 class Filing(TimestampMixin, Base):
@@ -92,7 +92,7 @@ class Filing(TimestampMixin, Base):
     category: Mapped[str | None] = mapped_column(String(64), nullable=True)
     document_metadata_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
-    company: Mapped["Company"] = relationship(back_populates="filings")
+    company: Mapped[Company] = relationship(back_populates="filings")
 
 
 class FinancialExtractRow(TimestampMixin, Base):
@@ -113,7 +113,7 @@ class FinancialExtractRow(TimestampMixin, Base):
     balance_sheet: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     profit_and_loss: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
-    company: Mapped["Company"] = relationship(back_populates="financial_extracts")
+    company: Mapped[Company] = relationship(back_populates="financial_extracts")
 
 
 class FeatureSet(TimestampMixin, Base):
@@ -130,7 +130,7 @@ class FeatureSet(TimestampMixin, Base):
         JSON, default=list, comment="list[RedFlag].model_dump()"
     )
 
-    company: Mapped["Company"] = relationship(back_populates="feature_sets")
+    company: Mapped[Company] = relationship(back_populates="feature_sets")
 
 
 class Score(TimestampMixin, Base):
@@ -146,7 +146,7 @@ class Score(TimestampMixin, Base):
     total: Mapped[int] = mapped_column(Integer)
     breakdown: Mapped[dict[str, Any]] = mapped_column(JSON, comment="ScoreBreakdown.model_dump()")
 
-    company: Mapped["Company"] = relationship(back_populates="scores")
+    company: Mapped[Company] = relationship(back_populates="scores")
 
 
 class AssessmentJob(TimestampMixin, Base):

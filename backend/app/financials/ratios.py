@@ -104,13 +104,21 @@ def altman_z(
         "total_liabilities": total_liabilities,
         "turnover": turnover,
     }
-    missing = [name for name, val in inputs.items() if val is None]
-    if missing:
+    if (
+        working_capital is None
+        or retained_earnings is None
+        or ebit is None
+        or total_assets is None
+        or total_liabilities is None
+        or turnover is None
+    ):
+        missing = [name for name, val in inputs.items() if val is None]
         return RatioValue(
             value=None,
             computable=False,
             reason=f"missing required inputs for Altman Z: {', '.join(missing)}",
         )
+
     if total_assets == 0 or total_liabilities == 0:
         return RatioValue(
             value=None,

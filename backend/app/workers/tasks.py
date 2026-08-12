@@ -14,7 +14,7 @@ from app.workers.celery_app import celery_app
 from app.workers.pipeline import run_assessment_pipeline
 
 
-@celery_app.task(name="run_assessment")
+@celery_app.task(name="run_assessment")  # type: ignore[untyped-decorator]
 def run_assessment(job_id: str, company_number: str) -> str:
     """Run the full assessment pipeline for `company_number` and persist the
     result against `job_id`.
