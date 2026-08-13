@@ -1,25 +1,27 @@
 import asyncio
 import os
+
 from dotenv import load_dotenv
 
 from app.ingestion.cache import RedisResponseCache
-from app.ingestion.rate_limiter import TokenBucketRateLimiter
 from app.ingestion.client import CompaniesHouseClient
+from app.ingestion.rate_limiter import TokenBucketRateLimiter
 
 load_dotenv()
 
 
-async def main():
-    cache = RedisResponseCache(os.getenv("REDIS_URL"))
+async def main() -> None:
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    cache = RedisResponseCache(redis_url)
     limiter = TokenBucketRateLimiter(
-        os.getenv("REDIS_URL"),
-        capacity=int(os.getenv("CH_RATE_LIMIT_REQUESTS", 600)),
-        window_seconds=int(os.getenv("CH_RATE_LIMIT_WINDOW_SECONDS", 300)),
+        redis_url,
+        capacity=int(os.getenv("CH_RATE_LIMIT_REQUESTS", "600")),
+        window_seconds=int(os.getenv("CH_RATE_LIMIT_WINDOW_SECONDS", "300")),
     )
     client = CompaniesHouseClient(
-        api_key=os.getenv("CH_API_KEY"),
-        base_url=os.getenv("CH_API_BASE_URL"),
-        document_base_url=os.getenv("CH_DOCUMENT_API_BASE_URL"),
+        api_key=os.getenv("CH_API_KEY", ""),
+        base_url=os.getenv("CH_API_BASE_URL", ""),
+        document_base_url=os.getenv("CH_DOCUMENT_API_BASE_URL", ""),
         rate_limiter=limiter,
         cache=cache,
     )
@@ -47,8 +49,8 @@ async def main():
         print("First 200 bytes:", content[:200])
 
         # save it locally so we can actually inspect what we got
-        with open("sample_accounts.xhtml", "wb") as f:
-            f.write(content)
+        with open("sample_accounts.xhtml", "wb") as f_out:
+            f_out.write(content)
         print("Saved to sample_accounts.xhtml")
 
 

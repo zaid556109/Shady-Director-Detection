@@ -3,6 +3,8 @@ test_contracts.py and test_pipeline.py."""
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from app.utils.mock_loader import MOCK_COMPANY_NUMBERS, load_mock_json
@@ -26,5 +28,5 @@ def scenario(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.fixture
-def load_mock():
+def load_mock() -> Any:
     return load_mock_json

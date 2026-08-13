@@ -22,6 +22,8 @@ dependencies = [
     "celery>=5.4",
     "redis>=5.0",
     "networkx>=3.3",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.2",
 ]
 
 [project.optional-dependencies]
@@ -47,10 +49,12 @@ select = ["E", "F", "I", "UP", "B"]
 python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
+mypy_path = "../contracts/src"
 
 [[tool.mypy.overrides]]
-module = ["celery.*", "networkx.*"]
+module = ["celery.*", "networkx.*", "bs4.*"]
 ignore_missing_imports = true
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

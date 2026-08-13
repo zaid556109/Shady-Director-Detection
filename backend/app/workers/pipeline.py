@@ -8,11 +8,17 @@ backend/tests/test_pipeline.py) without a broker or database running —
 
 from __future__ import annotations
 
+import asyncio
+from typing import TYPE_CHECKING
+
 from app.contracts import DirectorFeatureSet, FinancialExtract, RatioSet, RedFlag, ScoreBreakdown
 from app.director_features import build_features
 from app.financials import compute_ratios, extract_financials
 from app.ingestion import build_applicant_profile
 from app.scoring import score
+
+if TYPE_CHECKING:
+    from app.ingestion.client import CompaniesHouseClient
 
 
 class PipelineResult:
@@ -35,20 +41,15 @@ class PipelineResult:
         self.breakdown = breakdown
 
 
-def run_assessment_pipeline(company_number: str) -> PipelineResult:
-    """Run ingestion -> financials -> director_features -> scoring in order.
-
-    This is the "demo pipeline" that must work end-to-end on mock data from
-    commit 1 (see README "The pipeline"). Each step currently returns mock
-    data resolved from `company_number`; swapping any one step for a real
-    implementation doesn't change this function.
-    """
-    profile = build_applicant_profile(company_number)
+async def _run_pipeline_async(
+    company_number: str, client: CompaniesHouseClient | None = None
+) -> PipelineResult:
+    profile = await build_applicant_profile(company_number, client=client)
 
     financial_extracts = extract_financials(profile)
     ratios = compute_ratios(financial_extracts)
 
-    features, flags = build_features(profile)
+    features, flags = await build_features(profile, client=client)
 
     breakdown = score(ratios, features, flags)
 
@@ -59,3 +60,15 @@ def run_assessment_pipeline(company_number: str) -> PipelineResult:
         flags=flags,
         breakdown=breakdown,
     )
+
+
+def run_assessment_pipeline(
+    company_number: str, client: CompaniesHouseClient | None = None
+) -> PipelineResult:
+    """Run ingestion -> financials -> director_features -> scoring in order.
+
+    This is the "demo pipeline" that must work end-to-end on mock data from
+    commit 1 (see README "The pipeline"). Financials still return mock data;
+    ingestion and director_features now have real async implementations.
+    """
+    return asyncio.run(_run_pipeline_async(company_number, client=client))

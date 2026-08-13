@@ -31,7 +31,6 @@ FEATURE_PHRASES_NEGATIVE: dict[str, str] = {
 
 _SEVERITY_ORDER = {Severity.CRITICAL: 2, Severity.WARNING: 1, Severity.INFO: 0}
 
-
 def _ratio(contribution: FeatureContribution) -> float:
     return contribution.points / contribution.weight if contribution.weight else 0
 
@@ -48,7 +47,6 @@ def _top_negative(
 ) -> list[FeatureContribution]:
     ranked = sorted(contributions, key=_ratio)
     return [c for c in ranked if c.weight and _ratio(c) < 40][:n]
-
 
 def _top_flag(flags: list[RedFlag]) -> RedFlag | None:
     if not flags:
