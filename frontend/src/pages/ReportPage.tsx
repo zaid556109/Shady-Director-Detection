@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import DirectorGraphVisualizer from "../components/DirectorGraphVisualizer";
-import { mockApplicantProfile, mockScoreBreakdown } from "../mocks";
+import { mockApplicantProfile, mockDirectorFeatureSet, mockRatioSet, mockScoreBreakdown } from "../mocks";
 
 function scoreTier(total: number): "good" | "warn" | "bad" {
   if (total >= 70) return "good";
@@ -18,32 +18,32 @@ const TIER_COLOR: Record<"good" | "warn" | "bad", string> = {
 
 const FEATURE_HUMAN_NAMES: Record<string, { label: string; description: string }> = {
   dissolved_company_count: {
-    label: "Dissolved Company History (Clean)",
-    description: "Positive score contribution for zero company dissolutions across active directors",
+    label: "Dissolved Company History",
+    description: "Evaluates historical company dissolutions across active directors",
   },
   disqualification_flag: {
-    label: "Director Disqualification Status (Clean)",
-    description: "Positive score contribution for clean officer disqualification records",
+    label: "Director Disqualification Status",
+    description: "Evaluates officer disqualification records from Companies House register",
   },
   shared_address_cluster_size: {
-    label: "Registered Address Clustering (Normal)",
-    description: "Positive score contribution for normal registered office company density",
+    label: "Registered Address Density",
+    description: "Number of distinct companies registered at the exact same office address",
   },
   current_ratio: {
     label: "Current Ratio Liquidity",
-    description: "Ability to cover short-term obligations from current assets",
+    description: "Ability to cover short-term obligations from current liquid assets",
   },
   gearing: {
     label: "Gearing / Financial Leverage",
-    description: "Proportion of debt relative to equity capital",
+    description: "Proportion of net debt relative to total equity capital",
   },
   net_assets: {
     label: "Net Assets / Equity Balance",
-    description: "Total assets remaining after deducting liabilities",
+    description: "Total assets remaining after deducting all short and long-term liabilities",
   },
   altman_z: {
     label: "Altman Z-Score Solvency",
-    description: "Statistical formula predicting bankruptcy/insolvency risk",
+    description: "Statistical formula predicting corporate bankruptcy/insolvency risk",
   },
 };
 
@@ -51,19 +51,50 @@ export default function ReportPage() {
   const { companyNumber = "" } = useParams();
   const breakdown = mockScoreBreakdown(companyNumber);
   const profile = mockApplicantProfile(companyNumber);
-  const tier = scoreTier(breakdown.total);
+  const featureSet = mockDirectorFeatureSet(companyNumber);
+  const ratioSet = mockRatioSet(companyNumber);
 
+  const tier = scoreTier(breakdown.total);
   const [expandedFlags, setExpandedFlags] = useState<Record<string, boolean>>({});
 
   const toggleFlag = (id: string) => {
     setExpandedFlags((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const getActualRawValue = (featureName: string): string => {
+    switch (featureName) {
+      case "current_ratio":
+        return ratioSet?.current_ratio?.value !== null && ratioSet?.current_ratio?.value !== undefined
+          ? `${ratioSet.current_ratio.value.toFixed(2)}x`
+          : "N/A (Micro-Entity)";
+      case "gearing":
+        return ratioSet?.gearing?.value !== null && ratioSet?.gearing?.value !== undefined
+          ? `${(ratioSet.gearing.value * 100).toFixed(1)}%`
+          : "N/A (Micro-Entity)";
+      case "net_assets":
+        return ratioSet?.net_assets?.value !== null && ratioSet?.net_assets?.value !== undefined
+          ? `£${Math.round(ratioSet.net_assets.value).toLocaleString()}`
+          : "N/A";
+      case "altman_z":
+        return ratioSet?.altman_z?.value !== null && ratioSet?.altman_z?.value !== undefined
+          ? `${ratioSet.altman_z.value.toFixed(2)}`
+          : "N/A (Micro-Entity)";
+      case "disqualification_flag":
+        return featureSet?.aggregates?.any_disqualified ? "True (DISQUALIFIED)" : "False (Clean)";
+      case "dissolved_company_count":
+        return `${featureSet?.aggregates?.max_dissolved_company_count ?? 0} dissolved co.s`;
+      case "shared_address_cluster_size":
+        return `${featureSet?.aggregates?.max_shared_address_cluster_size ?? 1} co.s at address`;
+      default:
+        return "N/A";
+    }
+  };
+
   const recommendation =
     breakdown.total >= 70
       ? {
           title: "FAST TRACK APPROVAL",
-          subtitle: "Low Governance & Financial Risk Profile",
+          subtitle: "Low Governance & Financial Risk Profile — Standard Underwriting Approved",
           color: "#15803d",
           bg: "#f0fdf4",
           border: "#bbf7d0",
@@ -71,14 +102,14 @@ export default function ReportPage() {
       : breakdown.total >= 40
       ? {
           title: "REFER FOR MANUAL REVIEW",
-          subtitle: "Moderate Governance or Financial Risk — Underwriter Verification Recommended",
+          subtitle: "Moderate Governance or Financial Risk — Senior Underwriter Verification Required",
           color: "#b45309",
           bg: "#fffbeb",
           border: "#fef3c7",
         }
       : {
           title: "DECLINE / HIGH RISK",
-          subtitle: "Critical Red Flags or Governance Disqualifications Detected",
+          subtitle: "Critical Red Flags or Governance Disqualifications Detected — Rejection Recommended",
           color: "#b91c1c",
           bg: "#fef2f2",
           border: "#fecaca",
@@ -103,7 +134,7 @@ export default function ReportPage() {
             cursor: "pointer",
           }}
         >
-          🖨️ Export PDF / Print Report
+          🖨️ Export PDF / Print Assessment
         </button>
       </div>
 
@@ -138,7 +169,7 @@ export default function ReportPage() {
       >
         <div>
           <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: recommendation.color }}>
-            HEADLINE DECISION RECOMMENDATION
+            HEADLINE UNDERWRITING DECISION RECOMMENDATION
           </div>
           <div style={{ fontSize: "1.25rem", fontWeight: 800, color: recommendation.color, marginTop: "2px" }}>
             {recommendation.title}
@@ -162,7 +193,7 @@ export default function ReportPage() {
         </span>
       </div>
 
-      {/* Company Basics & Compliance Grid */}
+      {/* Company Profile Basics & Compliance Grid */}
       {profile && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
           {/* Company Details */}
@@ -245,15 +276,17 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Feature Contributions Table */}
+      {/* Feature Contributions Table WITH ACTUAL RAW NUMERIC VALUES */}
       <div className="card">
-        <h2>Feature-Level Scoring Breakdown</h2>
+        <h2>Feature-Level Scoring Breakdown (Actual Numeric Values & Points)</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {breakdown.feature_contributions.map((c) => {
             const meta = FEATURE_HUMAN_NAMES[c.feature_name] || {
               label: c.feature_name.replace(/_/g, " "),
               description: `Contribution factor for ${c.feature_name}`,
             };
+            const actualVal = getActualRawValue(c.feature_name);
+
             return (
               <div
                 key={c.feature_name}
@@ -261,27 +294,35 @@ export default function ReportPage() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "0.75rem 1rem",
+                  padding: "0.85rem 1.1rem",
                   background: "var(--color-bg)",
                   borderRadius: "6px",
                   border: "1px solid var(--color-border)",
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.9rem" }}>{meta.label}</div>
-                  <div style={{ fontSize: "0.78rem", color: "var(--color-text-muted)", marginTop: "2px" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#0f172a" }}>
+                    {meta.label}
+                  </div>
+                  <div style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", marginTop: "2px" }}>
                     {meta.description}
                   </div>
                 </div>
-                <span
-                  className={`contribution-row__points ${
-                    c.points >= 0 ? "contribution-row__points--positive" : "contribution-row__points--negative"
-                  }`}
-                  style={{ fontSize: "1rem", fontWeight: 800 }}
-                >
-                  {c.points >= 0 ? "+" : ""}
-                  {c.points} pts
-                </span>
+
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a" }}>
+                    {actualVal}
+                  </div>
+                  <span
+                    className={`contribution-row__points ${
+                      c.points >= 0 ? "contribution-row__points--positive" : "contribution-row__points--negative"
+                    }`}
+                    style={{ fontSize: "0.85rem", fontWeight: 700 }}
+                  >
+                    {c.points >= 0 ? "+" : ""}
+                    {c.points} pts contribution
+                  </span>
+                </div>
               </div>
             );
           })}

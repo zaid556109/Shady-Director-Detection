@@ -7,7 +7,7 @@ interface Node {
   id: string;
   label: string;
   sublabel?: string;
-  type: "target_company" | "officer" | "dissolved_company" | "address_cluster";
+  type: "target_company" | "officer" | "dissolved_company" | "active_company" | "address_cluster";
   x: number;
   y: number;
   labelYOffset?: number;
@@ -25,9 +25,6 @@ interface Edge {
 }
 
 export default function DirectorGraphVisualizer({ companyNumber }: { companyNumber: string }) {
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
-
   const featureSet = mockDirectorFeatureSet(companyNumber);
   const profile = mockApplicantProfile(companyNumber);
 
@@ -43,23 +40,23 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
   nodes.push({
     id: targetId,
     label: targetName,
-    sublabel: `Target Company (#${targetId})`,
+    sublabel: `Target Applicant (#${targetId})`,
     type: "target_company",
     x: 300,
     y: 275,
     labelYOffset: 38,
-    details: `Status: ${profile?.status || "Active"} | Registered: ${profile?.registered_address?.postal_code || "UK"}`,
+    details: `Status: ${profile?.status || "Active"} | Incorporation: ${profile?.incorporation_date || "2015"} | Registered: ${profile?.registered_address?.postal_code || "UK"}`,
     riskLevel: "clean",
   });
 
-  // 2. Director Nodes (Middle Row)
+  // 2. Director & Linked Company Nodes
   const numOfficers = officers.length;
   officers.forEach((off: OfficerSummary, idx: number) => {
     const offId = off.officer_id || `off-${idx}`;
     const feat: Partial<OfficerFeatures> =
       officerFeatures.find((f: OfficerFeatures) => f.officer_id === offId) || {};
 
-    // Horizontal positioning for officers: ensure generous gap (min 220px) so names NEVER collide
+    // Center officers with ample gap
     let offX = 300;
     if (numOfficers === 2) {
       offX = idx === 0 ? 170 : 430;
@@ -77,7 +74,7 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
       ? "warn"
       : "clean";
 
-    // Format officer display name cleanly (e.g. SMITH, John M.)
+    // Format officer name
     const rawName = off.name || "Director";
     const nameParts = rawName.split(",");
     const lastName = nameParts[0]?.trim() || rawName;
@@ -95,7 +92,7 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
       riskLevel,
       officerData: off,
       featureData: feat,
-      details: `Appointed: ${off.appointed_on || "N/A"} | Appointments: ${feat.appointments_count || 1} | Dissolved Co.s: ${dissolvedCount} | Disqualified: ${isDisqualified ? "YES" : "No"}`,
+      details: `Appointed: ${off.appointed_on || "N/A"} | Role: ${off.role} | Appointments: ${feat.appointments_count || 1} | Dissolved Co.s: ${dissolvedCount}`,
     });
 
     edges.push({
@@ -119,7 +116,7 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
         y: disY,
         labelYOffset: -28,
         riskLevel: "critical",
-        details: `Previous directorship of ${formattedName} that ended in company dissolution`,
+        details: `Previous directorship of ${formattedName} that ended in dissolution`,
       });
 
       edges.push({
@@ -130,7 +127,34 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
       });
     }
 
-    // 4. Shared Address Cluster node
+    // 4. External Active Companies (Top Row if no dissolved companies)
+    if (dissolvedCount === 0 && (feat.appointments_count || 1) > 1) {
+      const activeCoId = `active-${offId}`;
+      const activeX = numOfficers === 1 ? 160 : offX + (idx === 0 ? -65 : 65);
+      const activeY = 55;
+
+      const companyTitle = idx === 0 ? "SMITH CONSULTING LTD" : "TECHVENTURES PLC";
+      nodes.push({
+        id: activeCoId,
+        label: companyTitle,
+        sublabel: "External Active Company",
+        type: "active_company",
+        x: activeX,
+        y: activeY,
+        labelYOffset: -28,
+        riskLevel: "clean",
+        details: `Active external directorship held by ${formattedName} (Appointed 2018)`,
+      });
+
+      edges.push({
+        source: offId,
+        target: activeCoId,
+        dashed: true,
+        label: "active directorship",
+      });
+    }
+
+    // 5. Shared Address Cluster node
     const clusterSize = feat.shared_address_cluster_size || 1;
     if (clusterSize > 1) {
       const addrId = `addr-${offId}`;
@@ -155,11 +179,15 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
     }
   });
 
+  const [selectedNodeId, setSelectedNodeId] = useState<string>(nodes[1]?.id || nodes[0]?.id || "");
+  const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
+
+  const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
   const activeNode = hoveredNode || selectedNode;
 
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
-      {/* Metrics Summary Header */}
+    <div style={{ position: "relative", width: "100%" }}>
+      {/* Summary Metrics Bar */}
       <div
         style={{
           display: "flex",
@@ -203,6 +231,9 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#0f172a" }}></span> Clean Director
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#2563eb" }}></span> Active Co.
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#d97706" }}></span> Dissolved History
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -211,7 +242,7 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
         </div>
       </div>
 
-      {/* Interactive SVG Canvas */}
+      {/* Interactive SVG Graph Canvas */}
       <div
         style={{
           width: "100%",
@@ -233,6 +264,10 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
               <stop offset="0%" stopColor="#1e293b" />
               <stop offset="100%" stopColor="#0f172a" />
             </linearGradient>
+            <linearGradient id="activeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#2563eb" />
+              <stop offset="100%" stopColor="#1d4ed8" />
+            </linearGradient>
             <linearGradient id="warnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#d97706" />
               <stop offset="100%" stopColor="#b45309" />
@@ -247,7 +282,7 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
             </linearGradient>
           </defs>
 
-          {/* Draw Connection Lines */}
+          {/* Draw Connection Edges */}
           {edges.map((edge, i) => {
             const sourceNode = nodes.find((n) => n.id === edge.source);
             const targetNode = nodes.find((n) => n.id === edge.target);
@@ -273,6 +308,7 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
           {/* Draw Nodes */}
           {nodes.map((node) => {
             const isHovered = activeNode?.id === node.id;
+            const isSelected = selectedNodeId === node.id;
 
             let fillColor = "url(#cleanGrad)";
             let radius = 22;
@@ -282,6 +318,10 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
               fillColor = "url(#targetGrad)";
               radius = 28;
               badgeText = "HQ";
+            } else if (node.type === "active_company") {
+              fillColor = "url(#activeGrad)";
+              radius = 20;
+              badgeText = "CO";
             } else if (node.type === "dissolved_company") {
               fillColor = "url(#criticalGrad)";
               radius = 20;
@@ -308,23 +348,22 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
                 transform={`translate(${node.x}, ${node.y})`}
                 onMouseEnter={() => setHoveredNode(node)}
                 onMouseLeave={() => setHoveredNode(null)}
-                onClick={() => setSelectedNode(selectedNode?.id === node.id ? null : node)}
+                onClick={() => setSelectedNodeId(node.id)}
                 style={{ cursor: "pointer" }}
               >
-                {/* Glow ring on hover/selection */}
-                {isHovered && (
+                {/* Active selection / glow ring */}
+                {(isHovered || isSelected) && (
                   <circle
                     r={radius + 7}
                     fill="none"
                     stroke={node.riskLevel === "critical" ? "#ef4444" : "#3b82f6"}
-                    strokeWidth="2.5"
+                    strokeWidth={isSelected ? 3.5 : 2}
                     opacity="0.9"
                   />
                 )}
 
                 <circle r={radius} fill={fillColor} />
 
-                {/* Node Text Code */}
                 <text
                   textAnchor="middle"
                   dy=".35em"
@@ -335,7 +374,6 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
                   {badgeText}
                 </text>
 
-                {/* Label text directly above/below node */}
                 <text
                   y={yOffset}
                   textAnchor="middle"
@@ -355,78 +393,99 @@ export default function DirectorGraphVisualizer({ companyNumber }: { companyNumb
             );
           })}
         </svg>
+      </div>
 
-        {/* Hover / Selection Details Drawer */}
-        {activeNode ? (
+      {/* Rich Director & Company Background Details Card */}
+      <div
+        style={{
+          marginTop: "1rem",
+          padding: "1.2rem 1.4rem",
+          background: "#0f172a",
+          color: "#ffffff",
+          borderRadius: "10px",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
+          <div>
+            <div style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              SELECTED NODE DETAILS — {selectedNode.type.replace("_", " ").toUpperCase()}
+            </div>
+            <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "#f8fafc", marginTop: "2px" }}>
+              {selectedNode.label} {selectedNode.sublabel && <span style={{ fontSize: "0.88rem", color: "#94a3b8", fontWeight: 400 }}>({selectedNode.sublabel})</span>}
+            </div>
+          </div>
+
+          <span
+            style={{
+              fontSize: "0.78rem",
+              fontWeight: 800,
+              padding: "4px 12px",
+              borderRadius: "4px",
+              background:
+                selectedNode.riskLevel === "critical"
+                  ? "#dc2626"
+                  : selectedNode.riskLevel === "warn"
+                  ? "#d97706"
+                  : "#2563eb",
+              color: "#ffffff",
+            }}
+          >
+            {selectedNode.riskLevel === "critical"
+              ? "DISQUALIFIED / HIGH RISK"
+              : selectedNode.riskLevel === "warn"
+              ? "DISSOLVED HISTORY DETECTED"
+              : "CLEAN RECORD"}
+          </span>
+        </div>
+
+        <div style={{ fontSize: "0.88rem", color: "#e2e8f0", lineHeight: 1.5 }}>
+          {selectedNode.details}
+        </div>
+
+        {/* Detailed Officer Profile Breakdown */}
+        {selectedNode.officerData && (
           <div
             style={{
-              position: "absolute",
-              bottom: "12px",
-              left: "12px",
-              right: "12px",
-              background: "rgba(15, 23, 42, 0.96)",
-              color: "#ffffff",
-              padding: "0.85rem 1.2rem",
-              borderRadius: "8px",
-              fontSize: "0.85rem",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
-              border: `1px solid ${
-                activeNode.riskLevel === "critical"
-                  ? "#ef4444"
-                  : activeNode.riskLevel === "warn"
-                  ? "#f59e0b"
-                  : "#3b82f6"
-              }`,
+              marginTop: "1rem",
+              paddingTop: "1rem",
+              borderTop: "1px solid #334155",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "1rem",
+              fontSize: "0.82rem",
             }}
           >
             <div>
-              <strong style={{ fontSize: "1rem", color: "#f8fafc" }}>{activeNode.label}</strong>{" "}
-              <span style={{ color: "#94a3b8", fontSize: "0.82rem" }}>({activeNode.sublabel})</span>
-              <div style={{ color: "#cbd5e1", fontSize: "0.82rem", marginTop: "4px" }}>
-                {activeNode.details}
-              </div>
+              <strong style={{ color: "#94a3b8" }}>Full Name:</strong> {selectedNode.officerData.name}
             </div>
-            <span
-              style={{
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                background:
-                  activeNode.riskLevel === "critical"
-                    ? "#991b1b"
-                    : activeNode.riskLevel === "warn"
-                    ? "#92400e"
-                    : "#1e3a8a",
-                color: "#ffffff",
-                padding: "4px 10px",
-                borderRadius: "4px",
-                textTransform: "uppercase",
-              }}
-            >
-              {activeNode.type === "officer"
-                ? activeNode.riskLevel === "critical"
-                  ? "DISQUALIFIED RISK"
-                  : activeNode.riskLevel === "warn"
-                  ? "HIGH RISK (DISSOLVED)"
-                  : "CLEAN DIRECTOR"
-                : activeNode.type.replace("_", " ").toUpperCase()}
-            </span>
-          </div>
-        ) : (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "10px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              fontSize: "0.78rem",
-              color: "var(--color-text-muted)",
-              fontStyle: "italic",
-            }}
-          >
-            Click or hover any director node to inspect complete appointment history and risk metrics
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Corporate Role:</strong> {selectedNode.officerData.role}
+            </div>
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Appointed On:</strong> {selectedNode.officerData.appointed_on || "N/A"}
+            </div>
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Nationality:</strong> {selectedNode.officerData.nationality || "British"}
+            </div>
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Occupation:</strong> {selectedNode.officerData.occupation || "Company Director"}
+            </div>
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Disqualification Status:</strong>{" "}
+              <span style={{ color: selectedNode.featureData?.disqualification_flag ? "#ef4444" : "#22c55e", fontWeight: 700 }}>
+                {selectedNode.featureData?.disqualification_flag ? "DISQUALIFIED" : "No Disqualifications Recorded"}
+              </span>
+            </div>
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Total Directorships:</strong> {selectedNode.featureData?.appointments_count ?? 1} companies
+            </div>
+            <div>
+              <strong style={{ color: "#94a3b8" }}>Dissolved Directorships:</strong>{" "}
+              <span style={{ color: (selectedNode.featureData?.dissolved_company_count ?? 0) > 0 ? "#ef4444" : "#f8fafc", fontWeight: 700 }}>
+                {selectedNode.featureData?.dissolved_company_count ?? 0} companies
+              </span>
+            </div>
           </div>
         )}
       </div>
