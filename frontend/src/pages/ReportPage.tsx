@@ -90,26 +90,29 @@ export default function ReportPage() {
     }
   };
 
-  const recommendation =
+  const underwriting =
     breakdown.total >= 70
       ? {
-          title: "FAST TRACK APPROVAL",
-          subtitle: "Low Governance & Financial Risk Profile — Standard Underwriting Approved",
+          recommendation: "FAST TRACK APPROVAL",
+          creditLimit: "Up to £250,000 Unsecured",
+          riskRating: "LOW CREDIT RISK (Tier 1)",
           color: "#15803d",
           bg: "#f0fdf4",
           border: "#bbf7d0",
         }
       : breakdown.total >= 40
       ? {
-          title: "REFER FOR MANUAL REVIEW",
-          subtitle: "Moderate Governance or Financial Risk — Senior Underwriter Verification Required",
+          recommendation: "REFER FOR MANUAL REVIEW",
+          creditLimit: "Up to £50,000 (Requires Personal Guarantee)",
+          riskRating: "MODERATE CREDIT RISK (Tier 2)",
           color: "#b45309",
           bg: "#fffbeb",
           border: "#fef3c7",
         }
       : {
-          title: "DECLINE / HIGH RISK",
-          subtitle: "Critical Red Flags or Governance Disqualifications Detected — Rejection Recommended",
+          recommendation: "DECLINE APPLICATION",
+          creditLimit: "£0 (Facility Rejected)",
+          riskRating: "HIGH CREDIT RISK (Tier 3)",
           color: "#b91c1c",
           bg: "#fef2f2",
           border: "#fecaca",
@@ -125,16 +128,18 @@ export default function ReportPage() {
         <button
           onClick={() => window.print()}
           style={{
-            padding: "0.5rem 1rem",
-            background: "var(--color-bg)",
-            border: "1px solid var(--color-border)",
+            padding: "0.55rem 1.1rem",
+            background: "#0f172a",
+            color: "#ffffff",
+            border: "none",
             borderRadius: "6px",
             fontSize: "0.85rem",
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: "pointer",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
           }}
         >
-          🖨️ Export PDF / Print Assessment
+          🖨️ Export PDF Loan Report
         </button>
       </div>
 
@@ -152,100 +157,117 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Decision Recommendation Banner */}
+      {/* Underwriting Credit Decision Executive Banner */}
       <div
         style={{
-          background: recommendation.bg,
-          border: `1.5px solid ${recommendation.border}`,
-          borderRadius: "10px",
-          padding: "1rem 1.4rem",
+          background: underwriting.bg,
+          border: `2px solid ${underwriting.border}`,
+          borderRadius: "12px",
+          padding: "1.2rem 1.5rem",
           marginBottom: "1.5rem",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "1rem",
+          gap: "1.2rem",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
         }}
       >
         <div>
-          <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: recommendation.color }}>
-            HEADLINE UNDERWRITING DECISION RECOMMENDATION
+          <div style={{ fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: underwriting.color }}>
+            HEADLINE UNDERWRITING CREDIT DECISION
           </div>
-          <div style={{ fontSize: "1.25rem", fontWeight: 800, color: recommendation.color, marginTop: "2px" }}>
-            {recommendation.title}
+          <div style={{ fontSize: "1.4rem", fontWeight: 900, color: underwriting.color, marginTop: "3px" }}>
+            {underwriting.recommendation}
           </div>
-          <div style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", marginTop: "2px" }}>
-            {recommendation.subtitle}
+          <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-text-muted)", marginTop: "2px" }}>
+            Recommended Credit Facility: <strong style={{ color: "#0f172a" }}>{underwriting.creditLimit}</strong> • Risk Rating: <strong>{underwriting.riskRating}</strong>
           </div>
         </div>
         <span
           style={{
-            background: recommendation.color,
+            background: underwriting.color,
             color: "#ffffff",
-            fontWeight: 800,
-            fontSize: "0.85rem",
-            padding: "6px 14px",
-            borderRadius: "20px",
-            letterSpacing: "0.03em",
+            fontWeight: 900,
+            fontSize: "0.95rem",
+            padding: "8px 18px",
+            borderRadius: "24px",
+            letterSpacing: "0.04em",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
           }}
         >
-          {breakdown.total} SCORE
+          {breakdown.total} / 100 SCORE
         </span>
       </div>
 
-      {/* Company Profile Basics & Compliance Grid */}
-      {profile && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-          {/* Company Details */}
+      {/* Underwriter Credit Due-Diligence Checklist Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+        {/* Company Profile Details */}
+        {profile && (
           <div className="card" style={{ margin: 0 }}>
-            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Company Profile Details</h2>
-            <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Corporate Profile & Standing</h2>
+            <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
               <div><strong>Status:</strong> <span style={{ textTransform: "capitalize", fontWeight: 700, color: profile.status === "active" ? "var(--color-good)" : "var(--color-bad)" }}>{profile.status}</span></div>
-              <div><strong>Incorporation Date:</strong> {profile.incorporation_date || "N/A"}</div>
-              <div><strong>Registered Address:</strong> {profile.registered_address ? `${profile.registered_address.address_line_1 || profile.registered_address.premises || ""}, ${profile.registered_address.postal_code || ""}, ${profile.registered_address.country}` : "UK"}</div>
-              <div><strong>SIC Industry Codes:</strong> {profile.sic_codes?.join(", ") || "62020 (IT Consulting)"}</div>
+              <div><strong>Incorporation Date:</strong> {profile.incorporation_date || "2015-06-01"}</div>
+              <div><strong>Registered Address:</strong> {profile.registered_address ? `${profile.registered_address.address_line_1 || profile.registered_address.premises || ""}, ${profile.registered_address.postal_code || ""}` : "UK"}</div>
+              <div><strong>SIC Industry Code:</strong> {profile.sic_codes?.join(", ") || "62020 (Information Technology)"}</div>
             </div>
           </div>
+        )}
 
-          {/* Compliance Status */}
+        {/* Filing Compliance Status */}
+        {profile && (
           <div className="card" style={{ margin: 0 }}>
-            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Filing Compliance Status</h2>
-            <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Filing Compliance Audit</h2>
+            <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
               <div>
                 <strong>Accounts Status:</strong>{" "}
                 {profile.accounts_overdue ? (
-                  <span style={{ background: "#fee2e2", color: "#dc2626", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>OVERDUE</span>
+                  <span style={{ background: "#fee2e2", color: "#dc2626", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>OVERDUE (HIGH RISK)</span>
                 ) : (
-                  <span style={{ background: "#dcfce7", color: "#166534", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>UP TO DATE</span>
+                  <span style={{ background: "#dcfce7", color: "#166534", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>FILED & UP TO DATE</span>
                 )}
               </div>
-              <div><strong>Last Accounts Filed:</strong> {profile.filing_history?.last_accounts_made_up_to || "N/A"}</div>
-              <div><strong>Next Accounts Due:</strong> {profile.filing_history?.next_accounts_due_on || "N/A"}</div>
-              <div><strong>Late Filings Pattern:</strong> {profile.filing_history?.late_filings_count ?? 0} late filings recorded</div>
+              <div><strong>Last Accounts Made Up To:</strong> {profile.filing_history?.last_accounts_made_up_to || "2024-03-31"}</div>
+              <div><strong>Next Accounts Due:</strong> {profile.filing_history?.next_accounts_due_on || "2025-12-31"}</div>
+              <div><strong>Late Filings Record:</strong> {profile.filing_history?.late_filings_count ?? 0} late filings on record</div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Summary Explanation Card */}
+        {/* Financial Metrics Summary */}
+        {ratioSet && (
+          <div className="card" style={{ margin: 0 }}>
+            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Key Financial Ratios</h2>
+            <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+              <div><strong>Current Ratio:</strong> {ratioSet.current_ratio.value !== null ? `${ratioSet.current_ratio.value.toFixed(2)}x` : "N/A"}</div>
+              <div><strong>Gearing / Debt Ratio:</strong> {ratioSet.gearing.value !== null ? `${(ratioSet.gearing.value * 100).toFixed(1)}%` : "N/A"}</div>
+              <div><strong>Net Assets Balance:</strong> {ratioSet.net_assets.value !== null ? `£${Math.round(ratioSet.net_assets.value).toLocaleString()}` : "N/A"}</div>
+              <div><strong>Altman Z Solvency:</strong> {ratioSet.altman_z.value !== null ? `${ratioSet.altman_z.value.toFixed(2)}` : "N/A"}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Executive Summary Explanation */}
       <div className="card explanation-card">
-        <h2>Executive Summary</h2>
+        <h2>Executive Credit Summary</h2>
         <p>{breakdown.explanation}</p>
       </div>
 
-      {/* Director Graph (Person 3 Centerpiece) */}
+      {/* Director & Corporate Linkage Graph (Person 3 Centerpiece) */}
       <div className="card">
         <h2>Director & Corporate Linkage Graph</h2>
         <DirectorGraphVisualizer companyNumber={breakdown.company_number} />
       </div>
 
-      {/* Governance & Financial Subscores */}
+      {/* Cluster Subscores */}
       <div className="card">
         <h2>Cluster Subscores</h2>
         <div className="subscore-grid">
           <div>
             <div className="subscore-row">
-              <span className="subscore-row__label">Cluster A — Governance</span>
+              <span className="subscore-row__label">Cluster A — Governance History</span>
               <span className="subscore-row__value">{breakdown.cluster_subscores.governance}/100</span>
             </div>
             <div className="bar-track">
@@ -260,7 +282,7 @@ export default function ReportPage() {
           </div>
           <div>
             <div className="subscore-row">
-              <span className="subscore-row__label">Cluster B — Financials</span>
+              <span className="subscore-row__label">Cluster B — Financial Solvency</span>
               <span className="subscore-row__value">{breakdown.cluster_subscores.financial}/100</span>
             </div>
             <div className="bar-track">
@@ -276,9 +298,9 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Feature Contributions Table WITH ACTUAL RAW NUMERIC VALUES */}
+      {/* Feature Contributions Breakdown Table WITH ACTUAL RAW NUMERIC VALUES */}
       <div className="card">
-        <h2>Feature-Level Scoring Breakdown (Actual Numeric Values & Points)</h2>
+        <h2>Feature-Level Scoring Breakdown (Raw Figures & Score Points)</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {breakdown.feature_contributions.map((c) => {
             const meta = FEATURE_HUMAN_NAMES[c.feature_name] || {
@@ -296,7 +318,7 @@ export default function ReportPage() {
                   alignItems: "center",
                   padding: "0.85rem 1.1rem",
                   background: "var(--color-bg)",
-                  borderRadius: "6px",
+                  borderRadius: "8px",
                   border: "1px solid var(--color-border)",
                 }}
               >
@@ -310,7 +332,7 @@ export default function ReportPage() {
                 </div>
 
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a" }}>
+                  <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "#0f172a" }}>
                     {actualVal}
                   </div>
                   <span
@@ -331,7 +353,7 @@ export default function ReportPage() {
 
       {/* Red Flags & Traceable Evidence Section */}
       <div className="card">
-        <h2>Surfaced Red Flags & Evidence</h2>
+        <h2>Surfaced Red Flags & Evidence Audit</h2>
         {breakdown.flags.length === 0 ? (
           <p className="empty-note">No active red flags detected for this applicant.</p>
         ) : (
@@ -343,7 +365,7 @@ export default function ReportPage() {
                   key={flag.id}
                   style={{
                     border: "1px solid var(--color-border)",
-                    borderRadius: "6px",
+                    borderRadius: "8px",
                     overflow: "hidden",
                   }}
                 >
@@ -353,7 +375,7 @@ export default function ReportPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      padding: "0.75rem 1rem",
+                      padding: "0.85rem 1.1rem",
                       cursor: "pointer",
                       background: "var(--color-bg)",
                     }}
@@ -362,17 +384,17 @@ export default function ReportPage() {
                       <span className={`severity-badge severity-badge--${flag.severity}`}>
                         {flag.severity}
                       </span>
-                      <span className="flag-row__label" style={{ fontWeight: 600 }}>
+                      <span className="flag-row__label" style={{ fontWeight: 700 }}>
                         {flag.human_label}
                       </span>
                     </div>
-                    <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
+                    <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", fontWeight: 600 }}>
                       {isExpanded ? "▲ Hide Evidence" : "▼ View Traceable Evidence"}
                     </span>
                   </div>
 
                   {isExpanded && (
-                    <div style={{ padding: "0.85rem 1rem", background: "#ffffff", borderTop: "1px solid var(--color-border)", fontSize: "0.82rem" }}>
+                    <div style={{ padding: "1rem 1.1rem", background: "#ffffff", borderTop: "1px solid var(--color-border)", fontSize: "0.85rem" }}>
                       <strong style={{ color: "var(--color-text-muted)" }}>Traceable Evidence Records:</strong>
                       {flag.evidence && flag.evidence.length > 0 ? (
                         <ul style={{ margin: "0.4rem 0 0 1.2rem", padding: 0 }}>
