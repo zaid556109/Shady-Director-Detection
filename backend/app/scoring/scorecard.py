@@ -9,7 +9,13 @@ the calculation code.
 
 from __future__ import annotations
 
-from app.contracts import ClusterSubscores, DirectorFeatureSet, FeatureContribution, RatioSet, RedFlag
+from app.contracts import (
+    ClusterSubscores,
+    DirectorFeatureSet,
+    FeatureContribution,
+    RatioSet,
+    RedFlag,
+)
 
 FEATURE_WEIGHTS: dict[str, float] = {
     "current_ratio": 0.15,
@@ -22,9 +28,14 @@ FEATURE_WEIGHTS: dict[str, float] = {
 }
 
 FINANCIAL_KEYS = {"current_ratio", "gearing", "net_assets", "altman_z"}
-GOVERNANCE_KEYS = {"disqualification_flag", "dissolved_company_count", "shared_address_cluster_size"}
+GOVERNANCE_KEYS = {
+    "disqualification_flag",
+    "dissolved_company_count",
+    "shared_address_cluster_size",
+}
 
-NEUTRAL_SCORE = 50.0  # used when a ratio isn't computable — don't punish sparse accounts
+# Used when a ratio isn't computable — don't punish sparse accounts.
+NEUTRAL_SCORE = 50.0
 
 
 def _clamp(value: float, low: float = 0.0, high: float = 100.0) -> float:
@@ -81,7 +92,9 @@ def _score_shared_address(features: DirectorFeatureSet) -> float:
     return _clamp(100 - (size - 1) * 20)
 
 
-def _normalized_scores(ratios: RatioSet, features: DirectorFeatureSet) -> dict[str, float]:
+def _normalized_scores(
+    ratios: RatioSet, features: DirectorFeatureSet
+) -> dict[str, float]:
     return {
         "current_ratio": _score_current_ratio(ratios),
         "gearing": _score_gearing(ratios),
@@ -93,7 +106,9 @@ def _normalized_scores(ratios: RatioSet, features: DirectorFeatureSet) -> dict[s
     }
 
 
-def compute_cluster_subscores(ratios: RatioSet, features: DirectorFeatureSet, flags: list[RedFlag]) -> ClusterSubscores:
+def compute_cluster_subscores(
+    ratios: RatioSet, features: DirectorFeatureSet, flags: list[RedFlag]
+) -> ClusterSubscores:
     """Compute the two 0-100 cluster subscores."""
     normalized = _normalized_scores(ratios, features)
 
@@ -101,10 +116,12 @@ def compute_cluster_subscores(ratios: RatioSet, features: DirectorFeatureSet, fl
     governance_weight_total = sum(FEATURE_WEIGHTS[k] for k in GOVERNANCE_KEYS)
 
     financial_subscore = sum(
-        (FEATURE_WEIGHTS[k] / financial_weight_total) * normalized[k] for k in FINANCIAL_KEYS
+        (FEATURE_WEIGHTS[k] / financial_weight_total) * normalized[k]
+        for k in FINANCIAL_KEYS
     )
     governance_subscore = sum(
-        (FEATURE_WEIGHTS[k] / governance_weight_total) * normalized[k] for k in GOVERNANCE_KEYS
+        (FEATURE_WEIGHTS[k] / governance_weight_total) * normalized[k]
+        for k in GOVERNANCE_KEYS
     )
 
     return ClusterSubscores(
@@ -113,7 +130,9 @@ def compute_cluster_subscores(ratios: RatioSet, features: DirectorFeatureSet, fl
     )
 
 
-def compute_feature_contributions(ratios: RatioSet, features: DirectorFeatureSet, flags: list[RedFlag]) -> list[FeatureContribution]:
+def compute_feature_contributions(
+    ratios: RatioSet, features: DirectorFeatureSet, flags: list[RedFlag]
+) -> list[FeatureContribution]:
     """Compute signed point contributions for every feature in FEATURE_WEIGHTS."""
     normalized = _normalized_scores(ratios, features)
 

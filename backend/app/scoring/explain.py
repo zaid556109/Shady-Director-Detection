@@ -32,23 +32,36 @@ FEATURE_PHRASES_NEGATIVE: dict[str, str] = {
 _SEVERITY_ORDER = {Severity.CRITICAL: 2, Severity.WARNING: 1, Severity.INFO: 0}
 
 
-def _top_positive(contributions: list[FeatureContribution], n: int = 2) -> list[FeatureContribution]:
-    ranked = sorted(contributions, key=lambda c: (c.points / c.weight if c.weight else 0), reverse=True)
-    return [c for c in ranked if c.weight and (c.points / c.weight) >= 60][:n]
+def _ratio(contribution: FeatureContribution) -> float:
+    return contribution.points / contribution.weight if contribution.weight else 0
 
 
-def _top_negative(contributions: list[FeatureContribution], n: int = 2) -> list[FeatureContribution]:
-    ranked = sorted(contributions, key=lambda c: (c.points / c.weight if c.weight else 0))
-    return [c for c in ranked if c.weight and (c.points / c.weight) < 40][:n]
+def _top_positive(
+    contributions: list[FeatureContribution], n: int = 2
+) -> list[FeatureContribution]:
+    ranked = sorted(contributions, key=_ratio, reverse=True)
+    return [c for c in ranked if c.weight and _ratio(c) >= 60][:n]
+
+
+def _top_negative(
+    contributions: list[FeatureContribution], n: int = 2
+) -> list[FeatureContribution]:
+    ranked = sorted(contributions, key=_ratio)
+    return [c for c in ranked if c.weight and _ratio(c) < 40][:n]
 
 
 def _top_flag(flags: list[RedFlag]) -> RedFlag | None:
     if not flags:
         return None
-    return sorted(flags, key=lambda f: _SEVERITY_ORDER.get(f.severity, 0), reverse=True)[0]
+    return max(flags, key=lambda f: _SEVERITY_ORDER.get(f.severity, 0))
 
 
-def generate_explanation(total: int, cluster_subscores: ClusterSubscores, contributions: list[FeatureContribution], flags: list[RedFlag]) -> str:
+def generate_explanation(
+    total: int,
+    cluster_subscores: ClusterSubscores,
+    contributions: list[FeatureContribution],
+    flags: list[RedFlag],
+) -> str:
     """Produce a short (1-2 sentence) human-readable summary of the score."""
     positives = _top_positive(contributions)
     negatives = _top_negative(contributions)
