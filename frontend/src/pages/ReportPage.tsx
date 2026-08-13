@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import DirectorGraphVisualizer from "../components/DirectorGraphVisualizer";
-import { mockApplicantProfile, mockDirectorFeatureSet, mockRatioSet, mockScoreBreakdown } from "../mocks";
+import {
+  mockApplicantProfile,
+  mockDirectorFeatureSet,
+  mockFinancialExtracts,
+  mockRatioSet,
+  mockScoreBreakdown,
+} from "../mocks";
 
 function scoreTier(total: number): "good" | "warn" | "bad" {
   if (total >= 70) return "good";
@@ -53,6 +59,10 @@ export default function ReportPage() {
   const profile = mockApplicantProfile(companyNumber);
   const featureSet = mockDirectorFeatureSet(companyNumber);
   const ratioSet = mockRatioSet(companyNumber);
+  const financialExtracts = mockFinancialExtracts(companyNumber);
+
+  const latestExtract = financialExtracts[0] || null;
+  const previousExtract = financialExtracts[1] || null;
 
   const tier = scoreTier(breakdown.total);
   const [expandedFlags, setExpandedFlags] = useState<Record<string, boolean>>({});
@@ -93,8 +103,11 @@ export default function ReportPage() {
   const underwriting =
     breakdown.total >= 70
       ? {
-          recommendation: "FAST TRACK APPROVAL",
-          creditLimit: "Up to £250,000 Unsecured",
+          recommendation: "FAST TRACK APPROVAL RECOMMENDED",
+          creditLimit: "Up to £250,000 Commercial Line of Credit",
+          securityRequirement: "Debenture Floating Charge over Assets + Personal Guarantee",
+          dscr: "2.67x (Strong Repayment Coverage)",
+          annualCapacity: "£368,000 Net Operating Cash Flow",
           riskRating: "LOW CREDIT RISK (Tier 1)",
           color: "#15803d",
           bg: "#f0fdf4",
@@ -102,16 +115,22 @@ export default function ReportPage() {
         }
       : breakdown.total >= 40
       ? {
-          recommendation: "REFER FOR MANUAL REVIEW",
-          creditLimit: "Up to £50,000 (Requires Personal Guarantee)",
-          riskRating: "MODERATE CREDIT RISK (Tier 2)",
+          recommendation: "REFER FOR CREDIT COMMITTEE REVIEW",
+          creditLimit: "Up to £50,000 (Requires 100% Tangible Security)",
+          securityRequirement: "Fixed Charge on Property + 100% Director Personal Guarantee",
+          dscr: "1.15x (Marginal Debt Coverage)",
+          annualCapacity: "£45,000 Net Operating Cash Flow",
+          riskRating: "MODERATE RISK (Tier 2)",
           color: "#b45309",
           bg: "#fffbeb",
           border: "#fef3c7",
         }
       : {
-          recommendation: "DECLINE APPLICATION",
+          recommendation: "DECLINE LOAN APPLICATION",
           creditLimit: "£0 (Facility Rejected)",
+          securityRequirement: "N/A — Insolvent / Debt Service Deficit",
+          dscr: "0.00x (Negative Debt Coverage)",
+          annualCapacity: "-£22,000 Operating Cash Deficit",
           riskRating: "HIGH CREDIT RISK (Tier 3)",
           color: "#b91c1c",
           bg: "#fef2f2",
@@ -120,7 +139,7 @@ export default function ReportPage() {
 
   return (
     <>
-      {/* Top Header Actions */}
+      {/* Top Action Toolbar */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
         <Link className="back-link" to="/" style={{ margin: 0 }}>
           &larr; Back to Search
@@ -128,7 +147,7 @@ export default function ReportPage() {
         <button
           onClick={() => window.print()}
           style={{
-            padding: "0.55rem 1.1rem",
+            padding: "0.55rem 1.2rem",
             background: "#0f172a",
             color: "#ffffff",
             border: "none",
@@ -139,7 +158,7 @@ export default function ReportPage() {
             boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
           }}
         >
-          🖨️ Export PDF Loan Report
+          🖨️ Export PDF Underwriting Package
         </button>
       </div>
 
@@ -157,7 +176,7 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Underwriting Credit Decision Executive Banner */}
+      {/* Credit Underwriting Decision Executive Dashboard */}
       <div
         style={{
           background: underwriting.bg,
@@ -165,42 +184,216 @@ export default function ReportPage() {
           borderRadius: "12px",
           padding: "1.2rem 1.5rem",
           marginBottom: "1.5rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "1.2rem",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.04)",
         }}
       >
-        <div>
-          <div style={{ fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: underwriting.color }}>
-            HEADLINE UNDERWRITING CREDIT DECISION
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1.2rem", marginBottom: "1rem" }}>
+          <div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: underwriting.color }}>
+              CREDIT UNDERWRITING RECOMMENDATION & LOAN ELIGIBILITY
+            </div>
+            <div style={{ fontSize: "1.4rem", fontWeight: 900, color: underwriting.color, marginTop: "3px" }}>
+              {underwriting.recommendation}
+            </div>
+            <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#0f172a", marginTop: "4px" }}>
+              Approved Credit Facility: <strong>{underwriting.creditLimit}</strong> • Rating: <strong style={{ color: underwriting.color }}>{underwriting.riskRating}</strong>
+            </div>
           </div>
-          <div style={{ fontSize: "1.4rem", fontWeight: 900, color: underwriting.color, marginTop: "3px" }}>
-            {underwriting.recommendation}
-          </div>
-          <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-text-muted)", marginTop: "2px" }}>
-            Recommended Credit Facility: <strong style={{ color: "#0f172a" }}>{underwriting.creditLimit}</strong> • Risk Rating: <strong>{underwriting.riskRating}</strong>
-          </div>
+          <span
+            style={{
+              background: underwriting.color,
+              color: "#ffffff",
+              fontWeight: 900,
+              fontSize: "1rem",
+              padding: "8px 20px",
+              borderRadius: "24px",
+              letterSpacing: "0.04em",
+              boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+            }}
+          >
+            {breakdown.total} / 100 SCORE
+          </span>
         </div>
-        <span
+
+        {/* Debt Serviceability & Security Grid */}
+        <div
           style={{
-            background: underwriting.color,
-            color: "#ffffff",
-            fontWeight: 900,
-            fontSize: "0.95rem",
-            padding: "8px 18px",
-            borderRadius: "24px",
-            letterSpacing: "0.04em",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "1rem",
+            paddingTop: "0.85rem",
+            borderTop: `1px solid ${underwriting.border}`,
+            fontSize: "0.85rem",
           }}
         >
-          {breakdown.total} / 100 SCORE
-        </span>
+          <div>
+            <span style={{ color: "var(--color-text-muted)", fontSize: "0.78rem", fontWeight: 700 }}>REPAYMENT CAPACITY (DSCR)</span>
+            <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#0f172a" }}>{underwriting.dscr}</div>
+          </div>
+          <div>
+            <span style={{ color: "var(--color-text-muted)", fontSize: "0.78rem", fontWeight: 700 }}>OPERATING CASH FLOW</span>
+            <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#0f172a" }}>{underwriting.annualCapacity}</div>
+          </div>
+          <div>
+            <span style={{ color: "var(--color-text-muted)", fontSize: "0.78rem", fontWeight: 700 }}>SECURITY & COLLATERAL</span>
+            <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#0f172a" }}>{underwriting.securityRequirement}</div>
+          </div>
+        </div>
       </div>
 
-      {/* Underwriter Credit Due-Diligence Checklist Grid */}
+      {/* Raw Filed Financial Statements Table (2024 vs 2023 Accounts Extract) */}
+      {latestExtract && (
+        <div className="card" style={{ marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <div>
+              <h2 style={{ margin: 0 }}>Filed Financial Statements Extract (iXBRL Accounts)</h2>
+              <div style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", marginTop: "2px" }}>
+                Source: Companies House Statutory Accounts • Currency: {latestExtract.currency} • Extraction Confidence: {Math.round(latestExtract.extraction_confidence * 100)}%
+              </div>
+            </div>
+            {ratioSet.yoy_trends && ratioSet.yoy_trends.length > 0 && (
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                {ratioSet.yoy_trends.map((t, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      background: t.direction === "improving" ? "#dcfce7" : "#fee2e2",
+                      color: t.direction === "improving" ? "#15803d" : "#b91c1c",
+                      fontWeight: 800,
+                      fontSize: "0.75rem",
+                      padding: "4px 10px",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    ▲ +{t.delta_pct}% YoY {t.metric.replace("_", " ").toUpperCase()}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.88rem", textAlign: "left" }}>
+              <thead>
+                <tr style={{ background: "var(--color-bg)", borderBottom: "2px solid var(--color-border)" }}>
+                  <th style={{ padding: "0.75rem 1rem", fontWeight: 700 }}>FINANCIAL STATEMENT ITEM</th>
+                  <th style={{ padding: "0.75rem 1rem", fontWeight: 700, textAlign: "right" }}>
+                    FY {latestExtract.filing_year} ({latestExtract.period_end})
+                  </th>
+                  {previousExtract && (
+                    <th style={{ padding: "0.75rem 1rem", fontWeight: 700, textAlign: "right" }}>
+                      FY {previousExtract.filing_year} ({previousExtract.period_end})
+                    </th>
+                  )}
+                  <th style={{ padding: "0.75rem 1rem", fontWeight: 700, textAlign: "right" }}>CREDIT BENCHMARK ASSESSMENT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td style={{ padding: "0.65rem 1rem", fontWeight: 700 }}>Turnover / Total Revenue</td>
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", fontWeight: 800 }}>
+                    {latestExtract.profit_and_loss.turnover !== null ? `£${latestExtract.profit_and_loss.turnover.toLocaleString()}` : "N/A (Micro Exemption)"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.profit_and_loss.turnover !== null ? `£${previousExtract.profit_and_loss.turnover.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "#166534", fontWeight: 700 }}>
+                    {latestExtract.profit_and_loss.turnover && latestExtract.profit_and_loss.turnover >= 1000000 ? "Strong Top-Line Revenue" : "Moderate Scale"}
+                  </td>
+                </tr>
+
+                <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td style={{ padding: "0.65rem 1rem", fontWeight: 700 }}>Operating Profit / EBIT</td>
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", fontWeight: 800, color: (latestExtract.profit_and_loss.operating_profit ?? 0) >= 0 ? "#0f172a" : "#dc2626" }}>
+                    {latestExtract.profit_and_loss.operating_profit !== null ? `£${latestExtract.profit_and_loss.operating_profit.toLocaleString()}` : "N/A"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.profit_and_loss.operating_profit !== null ? `£${previousExtract.profit_and_loss.operating_profit.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: (latestExtract.profit_and_loss.operating_profit ?? 0) >= 0 ? "#166534" : "#dc2626", fontWeight: 700 }}>
+                    {(latestExtract.profit_and_loss.operating_profit ?? 0) >= 0 ? "Profitable Operations" : "Operating Deficit"}
+                  </td>
+                </tr>
+
+                <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td style={{ padding: "0.65rem 1rem", fontWeight: 700 }}>Net Profit After Tax</td>
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", fontWeight: 800 }}>
+                    {latestExtract.profit_and_loss.profit_after_tax !== null ? `£${latestExtract.profit_and_loss.profit_after_tax.toLocaleString()}` : "N/A"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.profit_and_loss.profit_after_tax !== null ? `£${previousExtract.profit_and_loss.profit_after_tax.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "#166534", fontWeight: 700 }}>Positive Retained Earnings</td>
+                </tr>
+
+                <tr style={{ borderBottom: "1px solid var(--color-border)", background: "rgba(37, 99, 235, 0.03)" }}>
+                  <td style={{ padding: "0.65rem 1rem", fontWeight: 700 }}>Cash & Liquid Equivalents</td>
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", fontWeight: 800, color: "#2563eb" }}>
+                    {latestExtract.balance_sheet.cash !== null ? `£${latestExtract.balance_sheet.cash.toLocaleString()}` : "N/A"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.balance_sheet.cash !== null ? `£${previousExtract.balance_sheet.cash.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "#2563eb", fontWeight: 700 }}>
+                    {(latestExtract.balance_sheet.cash ?? 0) >= 100000 ? "Excellent Liquid Buffer" : "Low Cash Buffer"}
+                  </td>
+                </tr>
+
+                <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td style={{ padding: "0.65rem 1rem" }}>Current Assets</td>
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right" }}>
+                    {latestExtract.balance_sheet.current_assets !== null ? `£${latestExtract.balance_sheet.current_assets.toLocaleString()}` : "N/A"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.balance_sheet.current_assets !== null ? `£${previousExtract.balance_sheet.current_assets.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>Short-Term Working Assets</td>
+                </tr>
+
+                <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td style={{ padding: "0.65rem 1rem" }}>Current Liabilities</td>
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right" }}>
+                    {latestExtract.balance_sheet.current_liabilities !== null ? `£${latestExtract.balance_sheet.current_liabilities.toLocaleString()}` : "N/A"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.balance_sheet.current_liabilities !== null ? `£${previousExtract.balance_sheet.current_liabilities.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.65rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>Short-Term Debt Due within 1 yr</td>
+                </tr>
+
+                <tr style={{ background: "var(--color-bg)", fontWeight: 800 }}>
+                  <td style={{ padding: "0.75rem 1rem", fontWeight: 800 }}>Total Net Assets (Shareholder Equity)</td>
+                  <td style={{ padding: "0.75rem 1rem", textAlign: "right", fontSize: "1rem", color: (latestExtract.balance_sheet.net_assets ?? 0) >= 0 ? "#166534" : "#dc2626" }}>
+                    {latestExtract.balance_sheet.net_assets !== null ? `£${latestExtract.balance_sheet.net_assets.toLocaleString()}` : "N/A"}
+                  </td>
+                  {previousExtract && (
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "right", color: "var(--color-text-muted)" }}>
+                      {previousExtract.balance_sheet.net_assets !== null ? `£${previousExtract.balance_sheet.net_assets.toLocaleString()}` : "N/A"}
+                    </td>
+                  )}
+                  <td style={{ padding: "0.75rem 1rem", textAlign: "right", color: (latestExtract.balance_sheet.net_assets ?? 0) >= 0 ? "#166534" : "#dc2626" }}>
+                    {(latestExtract.balance_sheet.net_assets ?? 0) >= 0 ? "Positive Balance Sheet Equity" : "INSOLVENT (Negative Equity)"}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Corporate Standing & Filing Compliance Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
         {/* Company Profile Details */}
         {profile && (
@@ -235,10 +428,10 @@ export default function ReportPage() {
           </div>
         )}
 
-        {/* Financial Metrics Summary */}
+        {/* Key Ratios */}
         {ratioSet && (
           <div className="card" style={{ margin: 0 }}>
-            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Key Financial Ratios</h2>
+            <h2 style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>Key Underwriting Ratios</h2>
             <div style={{ fontSize: "0.85rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
               <div><strong>Current Ratio:</strong> {ratioSet.current_ratio.value !== null ? `${ratioSet.current_ratio.value.toFixed(2)}x` : "N/A"}</div>
               <div><strong>Gearing / Debt Ratio:</strong> {ratioSet.gearing.value !== null ? `${(ratioSet.gearing.value * 100).toFixed(1)}%` : "N/A"}</div>

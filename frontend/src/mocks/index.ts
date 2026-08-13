@@ -6,7 +6,7 @@
 
 import type { ApplicantProfile } from "../contracts/applicant";
 import type { DirectorFeatureSet } from "../contracts/director-features";
-import type { RatioSet } from "../contracts/financial";
+import type { FinancialExtract, RatioSet } from "../contracts/financial";
 import type { ScoreBreakdown } from "../contracts/scoring";
 
 import healthyScore from "./healthy_plc/score_breakdown.json";
@@ -24,6 +24,10 @@ import sparseProfile from "./sparse_micro/applicant_profile.json";
 import healthyRatio from "./healthy_plc/ratio_set.json";
 import riskyRatio from "./risky_sme/ratio_set.json";
 import sparseRatio from "./sparse_micro/ratio_set.json";
+
+import healthyExtracts from "./healthy_plc/financial_extracts.json";
+import riskyExtracts from "./risky_sme/financial_extracts.json";
+import sparseExtracts from "./sparse_micro/financial_extracts.json";
 
 const MOCK_COMPANY_NUMBERS: Record<string, ScoreBreakdown> = {
   "01234567": healthyScore as ScoreBreakdown,
@@ -49,6 +53,12 @@ const MOCK_RATIOS: Record<string, RatioSet> = {
   "09999999": sparseRatio as unknown as RatioSet,
 };
 
+const MOCK_EXTRACTS: Record<string, FinancialExtract[]> = {
+  "01234567": healthyExtracts as unknown as FinancialExtract[],
+  "07654321": riskyExtracts as unknown as FinancialExtract[],
+  "09999999": sparseExtracts as unknown as FinancialExtract[],
+};
+
 const DEFAULT_SCENARIO = sparseScore as ScoreBreakdown;
 
 export function mockScoreBreakdown(companyNumber: string): ScoreBreakdown {
@@ -66,6 +76,11 @@ export function mockApplicantProfile(companyNumber: string): ApplicantProfile {
 export function mockRatioSet(companyNumber: string): RatioSet {
   return MOCK_RATIOS[companyNumber] ?? (sparseRatio as unknown as RatioSet);
 }
+
+export function mockFinancialExtracts(companyNumber: string): FinancialExtract[] {
+  return MOCK_EXTRACTS[companyNumber] ?? (sparseExtracts as unknown as FinancialExtract[]);
+}
+
 
 
 
